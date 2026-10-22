@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react";
+import Link from "next/link";
 import { Search, Heart, Gift, ShoppingBag, Menu, X } from "lucide-react";
 
 
@@ -40,7 +41,7 @@ export default function Navbar() {
           {open ? <X size={20} /> : <Menu size={20} />}
         </button>
 
-        <a href="/" className="text-2xl font-bold text-orange-500 sm:text-3xl">Etsy</a>
+        <a href="/" className="text-2xl font-bold text-orange-500 sm:text-3xl">TM</a>
 
 
 
@@ -78,28 +79,32 @@ export default function Navbar() {
           </button>
         </div>
 
-        {/* ডানের অংশ */}
+        {/* Right part  */}
         <div className="ml-auto flex items-center gap-3 sm:gap-4 md:ml-0">
-          <button className="hidden text-sm font-medium hover:underline sm:block">Sign in</button>
+        
+
+<Link href="/login" className="hidden text-sm font-medium hover:underline sm:block">
+  Sign in
+</Link>
           <Heart size={20} className="cursor-pointer" />
           <Gift size={20} className="hidden cursor-pointer sm:block" />
           <ShoppingBag size={20} className="cursor-pointer" />
         </div>
       </div>
 
-      {/* ডেস্কটপ লিংকের সারি */}
+    
       <nav className="hidden justify-center gap-8 pb-2 md:flex">
         {links.map((I) => (
           <a key={I.href} href={I.href} className="text-xs font-medium hover:underline">{I.label}</a>
         ))}
       </nav>
 
-      {/* মোবাইল ড্রপডাউন মেনু */}
+      
       {open && (
         <nav className="flex flex-col border-t border-gray-200 px-4 py-2 md:hidden">
           <a href="#" className="py-2 text-sm font-medium">Categories</a>
           {links.map((l) => (
-            <a key={l} href="#" className="py-2 text-sm hover:bg-gray-50">{l}</a>
+            <a key={l.href} href={l.href} className="py-2 text-sm hover:bg-gray-50">{l.label}</a>
           ))}
           <a href="#" className="py-2 text-sm font-medium sm:hidden">Sign in</a>
         </nav>
