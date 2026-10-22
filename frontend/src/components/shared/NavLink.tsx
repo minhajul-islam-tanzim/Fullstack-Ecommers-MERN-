@@ -1,11 +1,14 @@
-import React from 'react'
 
-const NavLink = () => {
+
+
+
+const navLink = () => {
   return (
     <div>
-      
+
+
     </div>
   )
 }
 
-export default NavLink
+export default navLink
