@@ -3,18 +3,18 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Search, Heart, Gift, ShoppingBag, Menu, X } from "lucide-react";
+import NavLink from "./ActiveNavLink";
+import type { NavType } from '@/types/types'
 
 
-interface NavType {
-  label: string, href: string
-}
+
 
 const links:NavType[] = [
+  { label: "Home", href: "/" },
   { label: "Gifts", href: "/gifts" },
   { label: "Special Birthday Gifts", href: "/birthday-gifts" },
   { label: "Home Favourites", href: "/home-favourites" },
   { label: "Fashion Finds", href: "/fashion-finds" },
-  { label: "Registry", href: "/registry" },
 ];
 
 const categories:NavType[] = [
@@ -41,8 +41,7 @@ export default function Navbar() {
           {open ? <X size={20} /> : <Menu size={20} />}
         </button>
 
-        <a href="/" className="text-2xl font-bold text-orange-500 sm:text-3xl">TM</a>
-
+        <Link href="/" className="text-2xl font-bold text-orange-500 sm:text-3xl">TM</Link>
 
 
 
@@ -57,9 +56,10 @@ export default function Navbar() {
     <ul className="w-40 overflow-hidden rounded-xl border border-gray-200 bg-white py-1 shadow-lg">
       {categories.map((c) => (
         <li key={c.href}>
-          <a href={c.href} className="block px-4 py-2 text-sm hover:bg-gray-100">
+          <Link href={c.href} className="block px-4 py-2 text-sm hover:bg-gray-100">
             {c.label}
-          </a>
+          </Link>
+          
         </li>
       ))}
     </ul>
@@ -82,31 +82,34 @@ export default function Navbar() {
         {/* Right part  */}
         <div className="ml-auto flex items-center gap-3 sm:gap-4 md:ml-0">
         
-
-<Link href="/login" className="hidden text-sm font-medium hover:underline sm:block">
-  Sign in
-</Link>
           <Heart size={20} className="cursor-pointer" />
           <Gift size={20} className="hidden cursor-pointer sm:block" />
           <ShoppingBag size={20} className="cursor-pointer" />
+
+<Link 
+  href="/login" 
+  className="hidden sm:inline-block text-sm font-semibold text-white bg-orange-500 hover:bg-orange-700 px-4 py-1.5 rounded-full shadow-sm hover:shadow-md transition-all duration-200 ease-in-out hover:-translate-y-0.5 active:translate-y-0 active:scale-95"
+>
+  Sign in
+</Link>
         </div>
       </div>
 
     
-      <nav className="hidden justify-center gap-8 pb-2 md:flex">
-        {links.map((I) => (
-          <a key={I.href} href={I.href} className="text-xs font-medium hover:underline">{I.label}</a>
-        ))}
-      </nav>
+    <nav className="hidden justify-center items-center gap-2 pb-2 md:flex md:gap-6">
+  {links.map((link) => (
+    <NavLink key={link.href} link={link}/>
+  ))}
+</nav>
 
       
       {open && (
         <nav className="flex flex-col border-t border-gray-200 px-4 py-2 md:hidden">
-          <a href="#" className="py-2 text-sm font-medium">Categories</a>
+          <Link href="#" className="py-2 text-sm font-medium">Categories</Link>
           {links.map((l) => (
-            <a key={l.href} href={l.href} className="py-2 text-sm hover:bg-gray-50">{l.label}</a>
+            <Link key={l.href} href={l.href} className="py-2 text-sm hover:bg-gray-50">{l.label}</Link>
           ))}
-          <a href="#" className="py-2 text-sm font-medium sm:hidden">Sign in</a>
+          <Link href="#" className="py-2 text-sm font-medium sm:hidden">Sign in</Link>
         </nav>
       )}
     </header>

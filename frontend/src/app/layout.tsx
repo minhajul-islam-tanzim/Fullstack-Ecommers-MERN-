@@ -1,4 +1,6 @@
 import Navbar from "@/components/shared/Navbar"
+import { Suspense } from "react";
+
 import "./globals.css";
 
 
@@ -7,7 +9,9 @@ const RootLayout = ({ children }: {children: React.ReactNode}) => {
     <html lang="en" >
         <body>    
     <div>
-      <Navbar />
+        <Suspense fallback={null}>
+          <Navbar />
+        </Suspense>
       {children}
     </div>
         </body>

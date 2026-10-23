@@ -18,7 +18,7 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="flex mt-40 items-center justify-center  px-4">
+    <main className="flex mt-45 items-center justify-center  px-4">
       <div className="w-full max-w-md rounded-2xl border border-gray-200 bg-white p-8 shadow-lg">
         <h1 className="text-center text-3xl font-bold text-orange-500">TM</h1>
         <p className="mt-2 text-center text-sm text-gray-500">
@@ -52,7 +52,7 @@ export default function LoginPage() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
+                placeholder="Enter Your Password"
                 className="w-full bg-transparent py-2.5 text-sm outline-none"
               />
               <button
@@ -83,7 +83,7 @@ export default function LoginPage() {
 
         <p className="mt-6 text-center text-sm text-gray-500">
           Don&apos;t have an account?{" "}
-          <Link href="/signup" className="font-medium text-orange-500 hover:underline">
+          <Link href="/register" className="font-medium text-orange-500 hover:underline">
             Sign up
           </Link>
         </p>
