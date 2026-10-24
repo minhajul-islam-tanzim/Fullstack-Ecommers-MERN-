@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation"
 import type { NavType } from '@/types/types'
 
 const ActiveNavLink = ({ link }: { link: NavType }) => {
-  const pathName = usePathname()
+  const pathName = usePathname();
   const isActive = pathName === link.href;
 
   return (
@@ -22,7 +22,7 @@ const ActiveNavLink = ({ link }: { link: NavType }) => {
         {link.label}
       </Link>
     </div>
-  )
+  );
 }
 
 export default ActiveNavLink;
