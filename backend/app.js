@@ -1,26 +1,44 @@
-require("dotenv").config()
-const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors');
+require("dotenv").config();
+const express = require("express");
+const mongoose = require("mongoose");
+const cors = require("cors");
+const session = require("express-session");
+const MongoDBStore = require("connect-mongodb-session")(session);
+const app = express();
+
+const store = new MongoDBStore({
+  uri: process.env.MONGO_URI,
+  collection: "sessions",
+});
+
+app.use((req, res, next) => {
+  console.log("first", req.url, req.method);
+  next();
+});
 
 
-const app = express()
+app.use(
+  cors({
+    origin: process.env.FRONT_DOMAIN,
+    credentials: true,
+  }),
+);
 
-app.use(cors())
-app.use(express.json())
 
 
+app.use(express.json());
 
 const PORT = process.env.PORT || 3001;
 
-
-mongoose.connect(process.env.MONGO_URI).then(() => { 
-    console.log("1st Wish is mongo connect successfully")
+mongoose
+  .connect(process.env.MONGO_URI)
+  .then(() => {
+    console.log("1st Wish is mongo connect successfully");
 
     app.listen(PORT, () => {
-        console.log('2nd wish Server is running')
-    })
-
-}).catch(() => {
-    console.log("1st False there is somethong wrong connected with Server")
-})
+      console.log("2nd wish Server is running");
+    });
+  })
+  .catch(() => {
+    console.log("1st False there is somethong wrong connected with Server");
+  });
