@@ -16,7 +16,6 @@ app.use((req, res, next) => {
   next();
 });
 
-
 app.use(
   cors({
     origin: process.env.FRONT_DOMAIN,
@@ -24,9 +23,26 @@ app.use(
   }),
 );
 
-
-
 app.use(express.json());
+
+
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    store: store,
+    cookie: {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    },
+  })
+);
+
+
+
 
 const PORT = process.env.PORT || 3001;
 
