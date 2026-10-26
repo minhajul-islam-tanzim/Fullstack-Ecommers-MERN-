@@ -1,8 +1,12 @@
 "use client";
 
 import { useState, FormEvent } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { User, Mail, Lock, Eye, EyeOff } from "lucide-react";
+import { registerUser } from "@/services/authService";
+
+
 
 export default function RegisterPage() {
   const [name, setName] = useState("");
@@ -12,6 +16,10 @@ export default function RegisterPage() {
   const [showPass, setShowPass] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  
+  
+  const router = useRouter();
+  
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -27,7 +35,19 @@ export default function RegisterPage() {
     }
 
     setLoading(true);
-    // এখানে API call হবে
+
+    try{
+      await registerUser(name, email, password)
+          router.push("/login");
+          setName(""); setEmail(""); setPassword(""); setConfirmPassword("");
+    } catch(err){
+        setError(err instanceof Error ? err.message : "Something went wrong");
+        
+        console.log('there is an error ', err)
+    }  finally {
+      setLoading(false);
+    }
+
   };
 
   return (

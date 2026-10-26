@@ -6,6 +6,9 @@ const session = require("express-session");
 const MongoDBStore = require("connect-mongodb-session")(session);
 const app = express();
 
+const authRoutes = require('./routes/authRouter')
+
+
 const store = new MongoDBStore({
   uri: process.env.MONGO_URI,
   collection: "sessions",
@@ -25,7 +28,6 @@ app.use(
 
 app.use(express.json());
 
-
 app.use(
   session({
     secret: process.env.SESSION_SECRET,
@@ -42,7 +44,13 @@ app.use(
 );
 
 
+app.use("/api/auth", authRoutes);
 
+
+
+
+
+app.use((req, res) => res.status(404).json({ message: "Route not found" }));
 
 const PORT = process.env.PORT || 3001;
 
@@ -50,7 +58,7 @@ mongoose
   .connect(process.env.MONGO_URI)
   .then(() => {
     console.log("1st Wish is mongo connect successfully");
-
+    console.log("DB:", mongoose.connection.host, mongoose.connection.name);
     app.listen(PORT, () => {
       console.log("2nd wish Server is running");
     });
