@@ -1,7 +1,7 @@
 const User = require('../models/user')
-
-
 const bcrypt = require("bcrypt");
+
+
 exports.register = async (req, res, next) => {
   try {
     const { name, password } = req.body;
@@ -23,3 +23,8 @@ exports.register = async (req, res, next) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+
+exports.login = async (req, res, next) => {
+  
+}
