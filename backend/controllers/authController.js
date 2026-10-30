@@ -28,7 +28,10 @@ exports.register = async (req, res, next) => {
 
 
 exports.login = async (req, res, next) => {
+
+   
   try {
+
     const email = req.body.email.toLowerCase().trim();
     const password = String(req.body.password ?? "");
 
@@ -36,10 +39,13 @@ exports.login = async (req, res, next) => {
     if (!user || !(await bcrypt.compare(password, user.password)))
       return res.status(400).json({ message: "Invalid email or password" });
 
-    req.session.userId = user._id;
+req.session.userId = user._id.toString();
+
     res.json({
       user: { id: user._id, name: user.name, email: user.email },
     });
+
+
   } catch (err) {
     console.log("Login error:", err);
     res.status(500).json({ message: "Server error" });
