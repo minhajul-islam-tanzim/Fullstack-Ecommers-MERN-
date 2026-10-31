@@ -51,3 +51,13 @@ req.session.userId = user._id.toString();
     res.status(500).json({ message: "Server error" });
   }
 };
+
+
+
+exports.logout = (req, res) => {
+  req.session.destroy(() => {
+    res.clearCookie("connect.sid");
+    res.json({message: "Logged out"})
+  })
+
+}
