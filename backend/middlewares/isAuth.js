@@ -1,11 +1,15 @@
 const isAuth = (req, res, next) => {
-  if (!req.session.user) {
+      console.log("Session ID:", req.sessionID);
+  console.log("User ID:", req.session.userId);
+
+
+  if (!req.session.userId) {
     return res.status(401).json({
       message: "please signup or Login first",
     });
   }
 
-  res.userId = req.session.user.id;
+  req.userId = req.session.userId;
   next();
 };
 

@@ -1,13 +1,13 @@
 "use client"
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Search, Heart, Gift, ShoppingBag, Menu, X } from "lucide-react";
 import NavLink from "./ActiveNavLink";
 import type { NavType } from '@/types/types'
-import { logoutUser } from "@/services/authService"
+import {getMe , logoutUser } from "@/services/authService"
 
-
+import { usePathname } from "next/navigation";
 
 
 const links:NavType[] = [
@@ -28,7 +28,36 @@ const categories:NavType[] = [
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
+const [user, setUser] = useState<{
+  id: string;
+  name: string;
+  email: string;
+} | null>(null);
 
+const pathname = usePathname();
+
+
+useEffect(() => {
+  getMe()
+    .then((data) => setUser(data.user))
+    .catch(() => setUser(null));
+}, [pathname]);
+
+
+
+  const handleLogout = async () => {
+    try{
+      await logoutUser();
+      setUser(null)
+    }catch(error) {
+      console.log(error)
+    }
+
+
+  }
+
+
+  
   return (
     <header className="border-b border-gray-200 bg-white">
     
@@ -87,12 +116,28 @@ export default function Navbar() {
           <Gift size={20} className="hidden cursor-pointer sm:block" />
           <ShoppingBag size={20} className="cursor-pointer" />
 
-<Link 
-  href="/login" 
-  className="hidden sm:inline-block text-sm font-semibold text-white bg-orange-500 hover:bg-orange-700 px-4 py-1.5 rounded-full shadow-sm hover:shadow-md transition-all duration-200 ease-in-out hover:-translate-y-0.5 active:translate-y-0 active:scale-95"
->
-  Sign in
-</Link>
+{user ? (
+  <div className="hidden items-center gap-3 sm:flex">
+    <span className="text-sm font-semibold text-gray-800">
+      {user.name}
+    </span>
+
+    <button
+      onClick={handleLogout}
+      className="rounded-full bg-gray-900 px-4 py-2 text-sm text-white hover:bg-red-600"
+    >
+      Logout
+    </button>
+  </div>
+) : (
+  <Link
+    href="/login"
+    className="hidden sm:inline-block rounded-full bg-orange-500 px-4 py-2 text-sm text-white"
+  >
+    Sign in
+  </Link>
+)}
+
         </div>
       </div>
 
@@ -110,7 +155,21 @@ export default function Navbar() {
           {links.map((l) => (
             <Link key={l.href} href={l.href} className="py-2 text-sm hover:bg-gray-50">{l.label}</Link>
           ))}
-          <Link href="#" className="py-2 text-sm font-medium sm:hidden">Sign in</Link>
+
+
+    {user ? (
+  <div className="hidden items-center gap-3 sm:flex">
+    <span className="text-sm font-semibold">{user.name}</span>
+    <button onClick={handleLogout}>Logout</button>
+  </div>
+) : (
+  <Link href="/login" className="hidden sm:inline-block">
+    Sign in
+  </Link>
+)}
+
+
+
         </nav>
       )}
     </header>

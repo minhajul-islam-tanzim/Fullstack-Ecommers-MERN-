@@ -38,6 +38,7 @@ exports.login = async (req, res, next) => {
       return res.status(400).json({ message: "Invalid email or password" });
 
     req.session.userId = user._id.toString();
+    
 
     res.json({
       user: { id: user._id, name: user.name, email: user.email },
@@ -50,9 +51,15 @@ exports.login = async (req, res, next) => {
 
 
 
+
+
+
 exports.me = async (req, res) => {
+    console.log("ME CONTROLLER CALLED");
+
   try {
     const user = await User.findById(req.userId);
+    console.log("Found user:", user);
     if (!user)
       return res.status(404).json({ message: "User not found, please sign up or login" });
 

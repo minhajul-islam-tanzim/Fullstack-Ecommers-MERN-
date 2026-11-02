@@ -1,7 +1,7 @@
 const express = require('express');
 const authRouter = express.Router()
 const {register, login, me, logout} = require('../controllers/authController')
-const {isAuth} = require("../middlewares/isAuth")
+const isAuth = require("../middlewares/isAuth")
 
     authRouter.post("/singUp", register)
     authRouter.post("/login", login);
