@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Search, Heart, Gift, ShoppingBag, Menu, X } from "lucide-react";
 import NavLink from "./ActiveNavLink";
 import type { NavType } from '@/types/types'
+import { logoutUser } from "@/services/authService"
 
 
 

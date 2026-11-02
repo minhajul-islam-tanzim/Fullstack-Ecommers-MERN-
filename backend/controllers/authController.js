@@ -1,6 +1,8 @@
 const User = require("../models/user");
 const bcrypt = require("bcrypt");
 
+
+
 exports.register = async (req, res, next) => {
   try {
     const { name, password } = req.body;
@@ -26,12 +28,8 @@ exports.register = async (req, res, next) => {
 
 
 
-
 exports.login = async (req, res, next) => {
-
-   
   try {
-
     const email = req.body.email.toLowerCase().trim();
     const password = String(req.body.password ?? "");
 
@@ -39,13 +37,11 @@ exports.login = async (req, res, next) => {
     if (!user || !(await bcrypt.compare(password, user.password)))
       return res.status(400).json({ message: "Invalid email or password" });
 
-req.session.userId = user._id.toString();
+    req.session.userId = user._id.toString();
 
     res.json({
       user: { id: user._id, name: user.name, email: user.email },
     });
-
-
   } catch (err) {
     console.log("Login error:", err);
     res.status(500).json({ message: "Server error" });
@@ -54,10 +50,26 @@ req.session.userId = user._id.toString();
 
 
 
+exports.me = async (req, res) => {
+  try {
+    const user = await User.findById(req.userId);
+    if (!user)
+      return res.status(404).json({ message: "User not found, please sign up or login" });
+
+    res.json({ user: { id: user._id, name: user.name, email: user.email } });
+    
+  } catch (err) {
+    console.log("Me error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+
+
+
 exports.logout = (req, res) => {
   req.session.destroy(() => {
     res.clearCookie("connect.sid");
-    res.json({message: "Logged out"})
-  })
-
-}
+    res.json({ message: "Logged out" });
+  });
+};

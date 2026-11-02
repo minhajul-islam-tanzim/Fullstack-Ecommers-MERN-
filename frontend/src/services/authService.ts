@@ -36,3 +36,18 @@ export const loginUser = async (email: string, password: string) => {
   return data;
 };
 
+export const getMe = async () => {
+  const response = await fetch(`${BASE_URL}/me`, { credentials: "include" })
+  const data = await response.json();
+   if (!response.ok) throw new Error(data.message);
+  return data;
+}
+
+
+export const logoutUser = async () => {
+  const response = await fetch(`${BASE_URL}/logout`, {
+    method:"POST",
+    credentials: "include"
+  })
+  return await response.json();
+}
