@@ -29,6 +29,8 @@ export default function LoginPage() {
   } catch (err) {
     setError(err instanceof Error ? err.message : "Something went wrong");
   } finally {
+    setEmail("")
+    setPassword("")
     setLoading(false);
   }
   };
