@@ -7,7 +7,7 @@ const MongoDBStore = require("connect-mongodb-session")(session);
 const app = express();
 
 const authRoutes = require('./routes/authRouter')
-// const userEditRouter = require("./routes/userEditRouter");
+const userEditRouter = require("./routes/userEditRouter");
 
 
 const store = new MongoDBStore({
@@ -46,7 +46,7 @@ app.use(
 
 
 app.use("/api/auth", authRoutes);
-// app.use("api/user", userEditRouter)
+app.use("/api/users", userEditRouter)
 
 
 
