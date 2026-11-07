@@ -63,7 +63,7 @@ exports.me = async (req, res) => {
     if (!user)
       return res.status(404).json({ message: "User not found, please sign up or login" });
 
-    res.json({ user: { id: user._id, name: user.name, email: user.email } });
+    res.json({ user: { id: user._id, name: user.name, email: user.email, role: user.role } });
     
   } catch (err) {
     console.log("Me error:", err);

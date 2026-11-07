@@ -6,7 +6,7 @@ import { Search, Heart, Gift, ShoppingBag, Menu, X, User } from "lucide-react";
 
 import NavLink from "./ActiveNavLink";
 import type { NavType } from "@/types/types";
-import { getMe, logoutUser } from "@/services/authService";
+import { getMe } from "@/services/authService";
 
 import { usePathname } from "next/navigation";
 
@@ -30,6 +30,7 @@ export default function Navbar() {
     id: string;
     name: string;
     email: string;
+    role: string;
   } | null>(null);
 
   const pathname = usePathname();
@@ -95,10 +96,20 @@ export default function Navbar() {
           <Heart size={20} className="cursor-pointer" />
           <Gift size={20} className="hidden cursor-pointer sm:block" />
           <ShoppingBag size={20} className="cursor-pointer" />
+          {user?.role === "admin" && (
+            <Link
+              href="/admin/add-product"
+              className="hidden rounded-full bg-black px-4 py-2 text-sm text-white hover:bg-gray-800 sm:inline-block"
+            >
+              Add Product
+            </Link>
+          )}
 
           {user ? (
-            <Link href="/profile" className="hidden items-center gap-3 sm:flex bg-blue-300 py-1 px-4 rounded-2xl hover:bg-blue-200 cursor-pointer transition-all">
-
+            <Link
+              href="/profile"
+              className="hidden items-center gap-3 sm:flex bg-blue-300 py-1 px-4 rounded-2xl hover:bg-blue-200 cursor-pointer transition-all"
+            >
               <button
                 className="rounded-full bg-gray-100 p-2"
                 aria-label="Profile"
@@ -117,8 +128,6 @@ export default function Navbar() {
               Sign in
             </Link>
           )}
-
-
         </div>
       </div>
 
