@@ -15,13 +15,15 @@ export default function AddProductPage() {
     const formData = new FormData(form);
 
     try {
+
       setLoading(true);
       setMessage("");
-
       await createProduct(formData);
-
       setMessage("Product created successfully!");
+      
       form.reset();
+
+
     } catch (error) {
       setMessage(
         error instanceof Error ? error.message : "Something went wrong"
