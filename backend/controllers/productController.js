@@ -4,7 +4,7 @@ const { Readable } = require("stream");
 
 const uploadToCloudinary = (buffer) => {
   return new Promise((resolve, reject) => {
-    const stream = cloudinary.uploader.upload_stream( 
+    const stream = cloudinary.uploader.upload_stream(
       { folder: "fashion-products" },
       (error, result) => {
         if (error) return reject(error);
@@ -18,13 +18,13 @@ const uploadToCloudinary = (buffer) => {
 exports.createProduct = async (req, res) => {
   try {
     const { name, gender, description, price, category, sizes, colors, stock } =
-      req.body; 
+      req.body;
 
     if (!req.file) {
       return res.status(400).json({
         message: "Product image is required",
       });
-    } 
+    }
 
     const imageUrl = await uploadToCloudinary(req.file.buffer);
 
@@ -48,6 +48,25 @@ exports.createProduct = async (req, res) => {
     console.log(error);
     res.status(500).json({
       message: "Server error",
+    });
+  }
+};
+
+exports.getAllProducts = async (req, res) => {
+  try {
+    const products = await Product.find().sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      count: products.length,
+      products,
+    });
+
+  } catch (error) {
+    console.log(error);
+
+    res.status(500).json({
+      message: "Failed to fetch products",
     });
   }
 };
