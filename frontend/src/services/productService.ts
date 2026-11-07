@@ -17,3 +17,18 @@ export const createProduct = async (formData: FormData) => {
     return data;
 
 }
+
+
+export const getAllProducts = async () => {
+    const res = await fetch(`${API_URL}/products`, {
+        method: "GET",
+        cache: "no-store"
+    })
+
+    const data = await res.json();
+
+    if(!res.ok){
+        throw new Error(data.messgae || "Failed to fetch Data from products")
+    }
+    return data;
+}
