@@ -1,7 +1,7 @@
 export const banners = [
   {
     id: 1,
-    title: "Discover Your Style",
+    title: "Men can change his Fashion",
     description: "Explore the latest fashion trends.",
     image: "/images/banner1.jpg",
     buttonText: "Shop Now",
@@ -9,7 +9,7 @@ export const banners = [
   },
   {
     id: 2,
-    title: "New Fashion Collection",
+    title: "Only for KIDS",
     description: "Find your perfect everyday look.",
     image: "/images/banner2.jpg",
     buttonText: "Explore Now",
@@ -17,7 +17,7 @@ export const banners = [
   },
   {
     id: 3,
-    title: "Style for Everyone",
+    title: "Style for ledis",
     description: "Fashion for Men, Women and Kids.",
     image: "/images/banner3.jpg",
     buttonText: "Discover More",
