@@ -31,7 +31,7 @@ const HeroSlider = () => {
               className="object-cover"
             />
 
-            <div className="absolute inset-0 bg-black/30 flex flex-col justify-center items-center text-white text-center px-4">
+            <div className="absolute inset-0 bg-black/40 flex flex-col justify-center items-center text-white text-center px-4">
               <h1 className="font-[var(--font-heading)] text-4xl md:text-6xl font-bold tracking-wide drop-shadow-lg">
                 {banner.title}
               </h1>
