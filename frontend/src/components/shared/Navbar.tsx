@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Search, Heart, Gift, ShoppingBag, Menu, X, User } from "lucide-react";
+import { Search, Heart, Gift, ShoppingBag, ChevronDown, X, User } from "lucide-react";
 
 import NavLink from "./ActiveNavLink";
 import type { NavType } from "@/types/types";
@@ -12,10 +12,9 @@ import { usePathname } from "next/navigation";
 
 const links: NavType[] = [
   { label: "Home", href: "/" },
-  { label: "Gifts", href: "/gifts" },
-  { label: "Special Birthday Gifts", href: "/birthday-gifts" },
-  { label: "Home Favourites", href: "/home-favourites" },
-  { label: "Fashion Finds", href: "/fashion-finds" },
+  { label: "New Arrivals", href: "/new-arrivals" },
+  { label: "Gifts", href: "/home-favourites" },
+  { label: "Home & Living", href: "/home-living" },
 ];
 
 const categories: NavType[] = [
@@ -49,19 +48,19 @@ export default function Navbar() {
           className="rounded-full p-2 hover:bg-gray-100 md:hidden"
           aria-label="Toggle menu"
         >
-          {open ? <X size={20} /> : <Menu size={20} />}
+          {open ? <X size={20} /> : <ChevronDown size={20} />}
         </button>
 
         <Link
           href="/"
-          className="text-2xl font-bold text-orange-500 sm:text-3xl"
+          className="text-2xl font-bold sm:text-2xl"
         >
-          TM
+          <span className="text-gray-500">A</span><span className="text-gray-400">N</span><span className="text-gray-300">Y</span>W<span className="text-sky-300">A</span><span className="text-sky-200">R</span><span>E</span>
         </Link>
 
         <div className="group relative hidden md:block">
           <button className="flex items-center gap-1 rounded-full px-3 py-2 text-sm font-medium hover:bg-gray-100">
-            <Menu size={16} /> Categories
+            <ChevronDown size={16} /> Categories
           </button>
 
           <div className="invisible absolute left-0 top-full z-50 pt-2 opacity-0 transition-all duration-200 group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100">
