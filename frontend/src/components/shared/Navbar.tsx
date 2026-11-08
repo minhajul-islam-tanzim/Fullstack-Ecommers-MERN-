@@ -14,6 +14,7 @@ const links: NavType[] = [
   { label: "Home", href: "/" },
   { label: "New Arrivals", href: "/new-arrivals" },
   { label: "Gifts", href: "/home-favourites" },
+  { label: "Birthday Gifts", href: "/birthday-gift" },
   { label: "Home & Living", href: "/home-living" },
 ];
 
