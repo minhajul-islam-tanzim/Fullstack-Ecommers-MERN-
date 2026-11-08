@@ -14,15 +14,15 @@ const HeroSlider = () => {
   return (
     <Swiper
       modules={[Autoplay, Pagination, Navigation]}
-      autoplay={{ delay: 4000 }}
+      autoplay={{ delay: 2000 }}
       pagination={{ clickable: true }}
       navigation
       loop
-      className="w-full"
+      className="w-full [--swiper-navigation-color:#fff] [--swiper-pagination-color:#fff]"
     >
       {banners.map((banner) => (
         <SwiperSlide key={banner.id}>
-          <div className="relative h-112.5 w-full">
+          <div className="relative h-125 w-full">
             <Image
               src={banner.image}
               alt={banner.title}
@@ -32,17 +32,17 @@ const HeroSlider = () => {
             />
 
             <div className="absolute inset-0 bg-black/40 flex flex-col justify-center items-center text-white text-center px-4">
-              <h1 className="text-4xl md:text-6xl font-bold">
+              <h1 className="font-[var(--font-heading)] text-4xl md:text-6xl font-bold tracking-wide drop-shadow-lg">
                 {banner.title}
               </h1>
 
-              <p className="mt-4 text-lg">
+              <p className="font-[var(--font-body)] mt-4 text-lg max-w-2xl opacity-90">
                 {banner.description}
               </p>
 
               <Link
                 href={banner.buttonLink}
-                className="mt-6 bg-orange-500 px-6 py-3 rounded-md"
+                className="font-[var(--font-body)] font-medium mt-6 bg-orange-500 hover:bg-orange-600 transition px-8 py-3 rounded-md"
               >
                 {banner.buttonText}
               </Link>

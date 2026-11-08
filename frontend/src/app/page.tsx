@@ -1,10 +1,14 @@
+import { Suspense } from "react";
+import HeroSlider from "@/components/home/HeroSlider";
 
-const page = () => {
+const Page = () => {
   return (
-    <div>
-    .
-    </div>
-  )
-}
+    <main>
+      <Suspense fallback={<div className="h-125 w-full bg-gray-200" />}>
+        <HeroSlider />
+      </Suspense>
+    </main>
+  );
+};
 
-export default page
+export default Page;
