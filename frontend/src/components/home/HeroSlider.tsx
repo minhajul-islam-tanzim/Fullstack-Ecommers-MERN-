@@ -22,7 +22,7 @@ const HeroSlider = () => {
     >
       {banners.map((banner) => (
         <SwiperSlide key={banner.id}>
-          <div className="relative h-[450px] w-full">
+          <div className="relative h-112.5 w-full">
             <Image
               src={banner.image}
               alt={banner.title}
