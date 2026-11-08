@@ -1,26 +1,26 @@
 import Navbar from "@/components/shared/Navbar"
 import { Suspense } from "react";
-import { Playfair_Display, Poppins } from "next/font/google";
+import { Playfair_Display, Lato } from "next/font/google";
 
 import "./globals.css";
 
+
+
 const playfair = Playfair_Display({
   subsets: ["latin"],
-  weight: ["700"],
-  variable: "--font-heading",
+  variable: "--font-playfair",
 });
 
-const poppins = Poppins({
+const lato = Lato({
   subsets: ["latin"],
-  weight: ["400", "500"],
-  variable: "--font-body",
+  weight: ["400", "700"],
+  variable: "--font-lato",
 });
-
 
 const RootLayout = ({ children }: {children: React.ReactNode}) => {
   return (
     <html lang="en" >
-       <body className={`${playfair.variable} ${poppins.variable}`}>
+       <body className={`${playfair.variable} ${lato.variable}`}>
     <div>
         <Suspense fallback={null}>
           <Navbar />

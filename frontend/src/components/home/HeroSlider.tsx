@@ -18,25 +18,26 @@ const HeroSlider = () => {
       pagination={{ clickable: true }}
       navigation
       loop
-      className="w-full [--swiper-navigation-color:#fff] [--swiper-pagination-color:#fff]"
+      className="w-full [--swiper-navigation-color:#fff] [--swiper-pagination-color:#fff] "
     >
       {banners.map((banner) => (
         <SwiperSlide key={banner.id}>
-          <div className="relative h-200 w-full">
-            <Image
-              src={banner.image}
-              alt={banner.title}
-              fill
-              priority
-              className="object-cover"
-            />
+  <div className="relative h-[60vh] min-h-55 w-full md:h-[75vh] lg:h-200 rounded-2xl">
+    <Image
+      src={banner.image}
+      alt={banner.title}
+      fill
+      priority
+      sizes="100vw"
+      className="object-cover"
+    />
 
             <div className="absolute inset-0 bg-black/40 flex flex-col justify-center items-center text-white text-center px-4">
-              <h1 className="font-[var(--font-heading)] text-4xl md:text-6xl font-bold tracking-wide drop-shadow-lg">
+              <h1 className=" text-4xl md:text-6xl font-bold tracking-wide drop-shadow-lg  font-(family-name:--font-lato)">
                 {banner.title}
-              </h1>
+              </h1>                                                                                                  
 
-              <p className="font-[var(--font-body)] mt-4 text-lg max-w-2xl opacity-90">
+              <p className="font-(--font-body) mt-4 text-lg max-w-2xl opacity-90  font-(family-name:--font-lato)">
                 {banner.description}
               </p>
 
