@@ -1,20 +1,22 @@
 const Text = () => {
   return (
-    <div className="flex flex-col items-center text-center py-12 px-4">
-      <span className="text-xs md:text-sm uppercase tracking-[0.3em] text-orange-500 font-semibold">
-        Explore Our Collection
-      </span>
+    <div className="mx-auto max-w-7xl px-4 pt-14 md:px-8 md:pt-20">
+      <h2 className="font-(family-name:--font-playfair) text-4xl font-bold leading-tight tracking-tight text-[#292521] md:text-6xl">
+        Shop by category
+      </h2>
 
-      <h1 className="font-(family-name:--font-playfair) text-3xl md:text-5xl font-bold text-[#292521] tracking-wide">
-        Shop By Category
-      </h1>                                                                                                                                                                                                                                                
-      <div className="w-16 h-0.5 bg-orange-500 my-5" />
+      <div className="mt-6 flex items-center justify-between gap-4 border-t border-[#292521]/15 pt-4 text-sm text-[#292521]/70 md:text-base">
+        <p className="font-(family-name:--font-lato) flex items-center gap-2">
+          <span className="h-2 w-2 rounded-full bg-orange-500" />
+          Find your perfect style
+        </p>
 
-      <p className="font-(family-name:--font-lato) text-sm md:text-base text-[#756D64] tracking-wide">
-        Find Your Perfect Style
-      </p>
+        <p className="font-(family-name:--font-playfair)">
+          Men, Women, Kids
+        </p>
+      </div>
     </div>
   );
 };
 
-export default Text;    
+export default Text;
