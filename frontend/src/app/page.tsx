@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import HeroSlider from "@/components/home/HeroSlider";
 import Text from "@/components/home/Text";
 import ShopByCategory from "@/components/home/ShopByCategory";
+import NewArrivals from "@/components/home/NewArrivals";
 
 const Page = () => {
   return (
@@ -10,6 +11,7 @@ const Page = () => {
         <HeroSlider />
         <Text />
         <ShopByCategory />
+        <NewArrivals></NewArrivals>
       </Suspense>
     </main>
   );
