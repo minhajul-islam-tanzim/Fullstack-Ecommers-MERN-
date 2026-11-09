@@ -56,7 +56,7 @@ export default function Navbar() {
           href="/"
           className="text-2xl font-bold sm:text-2xl"
         >
-          <span className="text-gray-500">A</span><span className="text-gray-400">N</span><span className="text-gray-300">Y</span>W<span className="text-sky-300">A</span><span className="text-sky-200">R</span><span>E</span>
+          <span className="text-gray-500">A</span><span className="text-gray-400">N</span><span className="text-gray-300">Y</span><span className="font-bold text-3xl">W</span><span className="text-sky-300">A</span><span className="text-sky-200">R</span><span>E</span>
         </Link>
 
         <div className="group relative hidden md:block">

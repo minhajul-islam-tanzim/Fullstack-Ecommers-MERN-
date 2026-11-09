@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { Playfair_Display, Lato } from "next/font/google";
 
 import "./globals.css";
+import Footer from "@/components/shared/Footer";
 
 
 
@@ -26,6 +27,7 @@ const RootLayout = ({ children }: {children: React.ReactNode}) => {
           <Navbar />
         </Suspense>
       {children}
+            <Footer/>
     </div>
         </body>
     </html>

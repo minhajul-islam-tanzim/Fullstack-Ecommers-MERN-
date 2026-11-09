@@ -33,9 +33,9 @@ const HeroSlider = () => {
     />
 
             <div className="absolute inset-0 bg-black/40 flex flex-col justify-center items-center text-white text-center px-4">
-              <h1 className=" text-4xl md:text-6xl font-bold tracking-wide drop-shadow-lg  font-(family-name:--font-lato)">
-                {banner.title}
-              </h1>                                                                                                  
+            <h1 className="font-(family-name:--font-playfair) text-4xl md:text-6xl font-bold tracking-wide drop-shadow-lg">
+  {banner.title}
+</h1>                                                      
 
               <p className="font-(--font-body) mt-4 text-lg max-w-2xl opacity-90  font-(family-name:--font-lato)">
                 {banner.description}
