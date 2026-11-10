@@ -32,3 +32,18 @@ export const getAllProducts = async () => {
     }
     return data;
 }
+
+
+export const getProductById = async (id: string) => {
+    const res = await fetch(`${API_URL}/products/${id}`, {
+        cache: "no-store"
+    });
+    const data = await res.json();
+
+     if (!res.ok) {
+    throw new Error(data.message || "Product not found");
+  }
+
+  return data.product;
+
+}
