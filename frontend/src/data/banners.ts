@@ -18,7 +18,7 @@ export const banners = [
   {
     id: 3,
     title: "Style for ledis",
-    description: "Fashion for Men, Women and Kids.",
+    description: "Fashion Women .",
     image: "/images/banner3.jpg",
     buttonText: "Discover More",
     buttonLink: "/categories",
@@ -26,7 +26,7 @@ export const banners = [
   {
     id: 4,
     title: "Fashion makes a man Smart",
-    description: "Fashion for Men, Women and Kids.",
+    description: "Fashion for Men.",
     image: "/images/banner4.jpg",
     buttonText: "Discover More",
     buttonLink: "/categories",
