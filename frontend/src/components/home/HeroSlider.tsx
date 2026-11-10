@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Autoplay, EffectFade } from "swiper/modules";
+import { Autoplay, EffectCoverflow } from "swiper/modules";
 import type { Swiper as SwiperType } from "swiper";
 import Image from "next/image";
 import Link from "next/link";
@@ -10,190 +10,151 @@ import { FiArrowLeft, FiArrowRight, FiArrowUpRight } from "react-icons/fi";
 import { banners } from "@/data/banners";
 
 import "swiper/css";
-import "swiper/css/effect-fade";
+import "swiper/css/effect-coverflow";
 
-const pad = (n: number) => String(n).padStart(2, "0");
+const copies = Math.ceil(8 / banners.length);
+const slides = Array.from(
+  { length: copies * banners.length },
+  (_, i) => banners[i % banners.length],
+);
 
 const HeroSlider = () => {
   const swiperRef = useRef<SwiperType | null>(null);
-  const barRef = useRef<HTMLDivElement | null>(null);
   const [active, setActive] = useState(0);
 
-  return (
-    <section className="relative overflow-hidden bg-[#dde9ecfb]">
-      <Swiper
-        modules={[Autoplay, EffectFade]}
-        effect="fade"
-        fadeEffect={{ crossFade: true }}
-        autoplay={{
-          delay: 3000,
-          disableOnInteraction: false,
-          pauseOnMouseEnter: false,
-        }}
-        loop
-        speed={900}
-        onSwiper={(s) => (swiperRef.current = s)}
-        onSlideChange={(s) => setActive(s.realIndex)}
-        onAutoplayTimeLeft={(_, __, progress) => {
-          if (barRef.current) {
-            barRef.current.style.transform = `scaleX(${1 - progress})`;
-          }
-        }}
-      >
-        {banners.map((banner, i) => {
-          const next = banners[(i + 1) % banners.length];
+  const current = banners[active];
 
-          return (
-            <SwiperSlide key={banner.id}>
-              <div className="relative mx-auto grid max-w-7xl items-center gap-6 px-4 pb-4 pt-8 md:grid-cols-12 md:px-8 md:pt-35  md:pb-35">
-                {/* Giant faded number */}
+  return (
+    <section className="relative overflow-hidden bg-[#292521] pb-10 pt-10 md:pb-12 md:pt-14 shadow-2xl">
+      {/* Orange glow */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute left-1/2 top-1/3 h-72 w-72 -translate-x-1/2 rounded-full bg-orange-500/30 blur-3xl md:h-105 md:w-105"
+      />
+
+      {/* Carousel */}
+      <div className="relative">
+        {/* Edge fades */}
+        <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-12 bg-linear-to-r from-[#292521] to-transparent md:w-40" />
+        <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-12 bg-linear-to-l from-[#292521] to-transparent md:w-40" />
+
+        <Swiper
+          modules={[Autoplay, EffectCoverflow]}
+          effect="coverflow"
+          coverflowEffect={{
+            rotate: 30,
+            stretch: 0,
+            depth: 180,
+            modifier: 1,
+            slideShadows: false,
+          }}
+          centeredSlides
+          slidesPerView="auto"
+          slideToClickedSlide
+          grabCursor
+          loop
+          speed={800}
+          autoplay={{
+            delay: 3000,
+            disableOnInteraction: false,
+            pauseOnMouseEnter: false,
+          }}
+          onSwiper={(s) => (swiperRef.current = s)}
+          onSlideChange={(s) => setActive(s.realIndex % banners.length)}
+          className="py-4"
+        >
+          {slides.map((banner, i) => (
+            <SwiperSlide
+              key={i}
+              className="group/s w-64! sm:w-72! md:w-80! lg:w-96!"
+            >
+              <div className="relative aspect-4/5 overflow-hidden rounded-3xl bg-[#EEF3F5] shadow-2xl shadow-black/40">
+                <Image
+                  src={banner.image}
+                  alt={banner.title}
+                  fill
+                  priority={i < 3}
+                  sizes="384px"
+                  className="object-contain"
+                />
                 <span
                   aria-hidden
-                  className="font-(family-name:--font-playfair) pointer-events-none absolute -top-2 left-2 select-none text-[7rem] font-bold leading-none text-[#292521]/[0.06] md:-top-4 md:left-4 md:text-[12rem]"
-                >
-                  {pad(i + 1)}
-                </span>
-
-                {/* Text */}
-                <div className="relative z-10 md:col-span-5 md:pr-6">
-                  <h1 className="font-(family-name:--font-playfair) text-4xl font-bold leading-[1.05] tracking-tight text-[#292521] md:text-6xl">
-                    {banner.title}
-                  </h1>
-
-                  <p className="font-(family-name:--font-lato) mt-5 max-w-md text-base leading-7 text-[#292521]/70 md:text-lg">
-                    {banner.description}
-                  </p>
-
-                  <Link
-                    href={banner.buttonLink}
-                    className="group mt-6 inline-flex items-center gap-3 rounded-full bg-[#292521] py-2 pl-6 pr-2 text-sm font-medium text-white transition-colors hover:bg-black"
-                  >
-                    {banner.buttonText}
-                    <span className="flex h-9 w-9 items-center justify-center rounded-full bg-orange-500 transition-transform group-hover:rotate-45">
-                      <FiArrowUpRight size={18} />
-                    </span>
-                  </Link>
-                </div>
-
-                {/* Images */}
-                <div className="relative mx-auto h-[42vh] min-h-72 w-[88%] md:col-span-7 md:h-110 md:w-full">
-                  {/* Back card = next slide */}
-                  <div className="absolute inset-0 origin-bottom-left translate-x-6 rotate-6 overflow-hidden rounded-3xl md:translate-x-10">
-                    <Image
-                      src={next.image}
-                      alt=""
-                      fill
-                      sizes="(min-width: 768px) 55vw, 90vw"
-                      className="object-cover"
-                    />
-                    <div className="absolute inset-0 bg-[#EEF3F5]/60" />
-                  </div>
-
-                  {/* Front card */}
-                  <div className="absolute inset-0 overflow-hidden rounded-3xl shadow-2xl shadow-black/20">
-                    <Image
-                      src={banner.image}
-                      alt={banner.title}
-                      fill
-                      priority={i === 0}
-                      sizes="(min-width: 768px) 55vw, 90vw"
-                      className="object-contain"
-                    />
-                  </div>
-
-                  {/* Rotating badge */}
-                  <div
-                    aria-hidden
-                    className="absolute -left-6 -top-6 flex h-24 w-24 items-center justify-center rounded-full bg-white shadow-lg md:-left-10 md:-top-8 md:h-28 md:w-28"
-                  >
-                    <svg
-                      viewBox="0 0 120 120"
-                      className="absolute inset-0 h-full w-full animate-[spin_18s_linear_infinite]"
-                    >
-                      <defs>
-                        <path
-                          id={`badge-${i}`}
-                          d="M60,60 m-44,0 a44,44 0 1,1 88,0 a44,44 0 1,1 -88,0"
-                        />
-                      </defs>
-                      <text
-                        className="fill-[#292521]"
-                        style={{ fontSize: 10.5, letterSpacing: "0.12em" }}
-                      >
-                        <textPath
-                          href={`#badge-${i}`}
-                          textLength="268"
-                          lengthAdjust="spacing"
-                        >
-                          Anyware · New season · Shop now ·
-                        </textPath>
-                      </text>
-                    </svg>
-                    <span className="flex h-10 w-10 items-center justify-center rounded-full bg-orange-500 text-white md:h-12 md:w-12">
-                      <FiArrowUpRight size={20} />
-                    </span>
-                  </div>
-                </div>
+                  className="absolute inset-0 bg-[#292521]/55 transition-opacity duration-500 group-[.swiper-slide-active]/s:opacity-0"
+                />
               </div>
             </SwiperSlide>
-          );
-        })}
-      </Swiper>
+          ))}
+        </Swiper>
 
-      {/* Controls */}
-      <div className="mx-auto max-w-7xl px-4 pb-5 md:px-8">
-        <div className="flex items-end justify-between gap-4">
-          {/* Thumbnails */}
-          <div className="flex items-center gap-3">
-            {banners.map((b, i) => (
-              <button
-                key={b.id}
-                onClick={() => swiperRef.current?.slideToLoop(i)}
-                aria-label={`Go to slide ${i + 1}`}
-                className={`relative h-12 w-9 overflow-hidden rounded-lg transition-all duration-300 md:h-14 md:w-10 ${
-                  active === i
-                    ? "ring-2 ring-[#292521] ring-offset-2 ring-offset-[#EEF3F5]"
-                    : "opacity-50 hover:opacity-100"
-                }`}
-              >
-                <Image
-                  src={b.image}
-                  alt=""
-                  fill
-                  sizes="40px"
-                  className="object-cover"
-                />
-              </button>
-            ))}
-          </div>
+        {/* Arrows (desktop) */}
+        <button
+          onClick={() => swiperRef.current?.slidePrev()}
+          aria-label="Previous slide"
+          className="absolute left-6 top-1/2 z-20 hidden h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-white/30 text-white transition-colors hover:bg-white hover:text-[#292521] md:flex"
+        >
+          <FiArrowLeft size={20} />
+        </button>
+        <button
+          onClick={() => swiperRef.current?.slideNext()}
+          aria-label="Next slide"
+          className="absolute right-6 top-1/2 z-20 hidden h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-white/30 text-white transition-colors hover:bg-white hover:text-[#292521] md:flex"
+        >
+          <FiArrowRight size={20} />
+        </button>
+      </div>
 
-          {/* Arrows */}
-          <div className="flex gap-2">
-            <button
-              onClick={() => swiperRef.current?.slidePrev()}
-              aria-label="Previous slide"
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-[#292521]/30 text-[#292521] transition-colors hover:bg-[#292521] hover:text-white"
-            >
-              <FiArrowLeft size={18} />
-            </button>
-            <button
-              onClick={() => swiperRef.current?.slideNext()}
-              aria-label="Next slide"
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-[#292521]/30 text-[#292521] transition-colors hover:bg-[#292521] hover:text-white"
-            >
-              <FiArrowRight size={18} />
-            </button>
-          </div>
-        </div>
+      {/* Text */}
+      <div
+        key={current.id}
+        className="relative z-10 mx-auto mt-8 flex max-w-2xl flex-col items-center px-4 text-center transition-all duration-700 starting:translate-y-4 starting:opacity-0"
+      >
+        <h1 className="font-(family-name:--font-playfair) text-3xl font-bold leading-tight tracking-tight text-white md:text-5xl">
+          {current.title}
+        </h1>
 
-        {/* Autoplay line */}
-        <div className="mt-4 h-0.5 w-full overflow-hidden bg-[#292521]/15">
-          <div
-            ref={barRef}
-            className="h-full origin-left bg-[#292521]"
-            style={{ transform: "scaleX(0)" }}
+        <p className="font-(family-name:--font-lato) mt-3 line-clamp-2 max-w-md text-sm leading-6 text-white/70 md:text-base">
+          {current.description}
+        </p>
+
+        <Link
+          href={current.buttonLink}
+          className="group mt-6 inline-flex items-center gap-3 rounded-full bg-white py-2 pl-6 pr-2 text-sm font-medium text-[#292521] transition-colors hover:bg-[#EEF3F5]"
+        >
+          {current.buttonText}
+          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-orange-500 text-white transition-transform group-hover:rotate-45">
+            <FiArrowUpRight size={18} />
+          </span>
+        </Link>
+      </div>
+
+      {/* Dots */}
+      <div className="relative z-10 mt-6 flex items-center justify-center gap-2">
+        {banners.map((b, i) => (
+          <button
+            key={b.id}
+            onClick={() => swiperRef.current?.slideToLoop(i)}
+            aria-label={`Go to slide ${i + 1}`}
+            className={`h-1.5 rounded-full transition-all duration-300 ${
+              active === i
+                ? "w-8 bg-orange-500"
+                : "w-1.5 bg-white/30 hover:bg-white/60"
+            }`}
           />
-        </div>
+        ))}
+      </div>
+
+      {/* Tilted number */}
+      <div
+        key={active}
+        aria-hidden
+        className="font-(family-name:--font-playfair) pointer-events-none absolute bottom-10 z-10 hidden -rotate-12 select-none leading-none transition-all duration-700 starting:translate-y-6 starting:opacity-0 lg:left-[20%] lg:block xl:left-94"
+      >
+        <span className="text-[10rem] font-bold text-transparent [-webkit-text-stroke:1.5px_rgba(249,115,22,0.9)] xl:text-[16rem]">
+          {active + 1}
+        </span>
+        <span className="ml-2 text-2xl text-white/50 xl:text-4xl">
+          / {banners.length}
+        </span>
       </div>
     </section>
   );

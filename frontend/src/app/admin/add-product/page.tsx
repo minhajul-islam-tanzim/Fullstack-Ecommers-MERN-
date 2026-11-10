@@ -3,7 +3,7 @@
 import { useState, FormEvent, ChangeEvent } from "react";
 import { createProduct } from "@/services/productService";
 
-const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5 MB
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024; 
 
 export default function AddProductPage() {
   const [loading, setLoading] = useState(false);

@@ -9,7 +9,7 @@ export const banners = [
   },
   {
     id: 2,
-    title: "Only for KIDS",
+    title: "Every man can Do It",
     description: "Find your perfect everyday look.",
     image: "/images/banner2.jpg",
     buttonText: "Explore Now",
@@ -20,6 +20,14 @@ export const banners = [
     title: "Style for ledis",
     description: "Fashion for Men, Women and Kids.",
     image: "/images/banner3.jpg",
+    buttonText: "Discover More",
+    buttonLink: "/categories",
+  },
+  {
+    id: 4,
+    title: "Fashion makes a man Smart",
+    description: "Fashion for Men, Women and Kids.",
+    image: "/images/banner4.jpg",
     buttonText: "Discover More",
     buttonLink: "/categories",
   },
