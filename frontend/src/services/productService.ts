@@ -47,3 +47,19 @@ export const getProductById = async (id: string) => {
   return data.product;
 
 }
+
+
+export const deleteProduct = async (id: string) => {
+  const res = await fetch(`${API_URL}/products/${id}`, {
+    method: "DELETE",
+    credentials: "include",
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(data.message || "Product delete failed");
+  }
+
+  return data;
+};
