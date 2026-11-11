@@ -301,7 +301,6 @@ const ProductDetailsContent = () => {
           {/* Add to cart */}
           <button
             disabled={!inStock}
-            // TODO: এখানে cart এ যোগ করার কোড বসাও (product, size, color, qty)
             className="group mt-8 inline-flex w-full items-center justify-between rounded-full bg-[#292521] py-2 pl-7 pr-2 text-base font-medium text-white transition-colors hover:bg-black disabled:cursor-not-allowed disabled:opacity-40 sm:w-auto sm:min-w-80"
           >
             {inStock ? "Add to cart" : "Out of stock"}

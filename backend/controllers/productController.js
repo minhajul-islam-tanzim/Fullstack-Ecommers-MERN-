@@ -61,7 +61,6 @@ exports.getAllProducts = async (req, res) => {
       count: products.length,
       products,
     });
-
   } catch (error) {
     console.log(error);
 
@@ -72,24 +71,49 @@ exports.getAllProducts = async (req, res) => {
 };
 
 exports.getProductById = async (req, res) => {
-  try{
-    const product = await Product.findById(req.params.id)
+  try {
+    const product = await Product.findById(req.params.id);
 
-
-      if (!product) {
+    if (!product) {
       return res.status(404).json({
         message: "Product not found",
       });
     }
-    
-     res.status(200).json({
+
+    res.status(200).json({
       success: true,
       product,
     });
-
-
-  }catch (error) {
+  } catch (error) {
     res.status(500).json({
       message: "Failed to fetch product",
-    })}
-}
+    });
+  }
+};
+
+
+export const deleteProduct = async (req , res ) => {
+  try {
+    const { id } = req.params;
+
+    const product = await Product.findByIdAndDelete(id);
+
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: "Product not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Product deleted successfully",
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to delete product",
+    });
+  }
+};
