@@ -92,7 +92,7 @@ exports.getProductById = async (req, res) => {
 };
 
 
-export const deleteProduct = async (req , res ) => {
+exports.deleteProduct = async (req , res ) => {
   try {
     const { id } = req.params;
 

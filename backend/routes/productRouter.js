@@ -12,6 +12,6 @@ const isAdmin = require("../middlewares/isAdmin")
 productRouter.post("/", isAuth, isAdmin,  upload.single("image"), createProduct)
 productRouter.get("/", getAllProducts)
 productRouter.get("/:id", getProductById)
-productRouter.post("/:id", deleteProduct)
+productRouter.delete("/:id",isAuth, isAdmin,deleteProduct)
 
 module.exports = productRouter;

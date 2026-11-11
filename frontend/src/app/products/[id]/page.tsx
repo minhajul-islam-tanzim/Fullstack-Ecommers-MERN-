@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+
 import { useParams, useRouter } from "next/navigation";
 import {
   FiArrowLeft,
@@ -15,7 +16,7 @@ import {
   FiRefreshCcw,
 } from "react-icons/fi";
 import { FaHeart, FaRegHeart } from "react-icons/fa6";
-import { getProductById } from "@/services/productService";
+import { deleteProduct, getProductById } from "@/services/productService";
 import { getMe } from "@/services/authService";
 
 interface Product {
@@ -83,66 +84,43 @@ const ProductDetailsContent = () => {
   const [qty, setQty] = useState(1);
   const [liked, setLiked] = useState(false);
 
-
- useEffect(() => {
+  useEffect(() => {
     const fetchDetails = async () => {
+      try {
+        const [productData, userData] = await Promise.all([
+          getProductById(id),
+          getMe().catch(() => null),
+        ]);
 
-        try{
-            const [productData, userData] = await Promise.all([
-                getProductById(id),
-                getMe().catch(() => null)
-            ])  
-            
-            setProduct(productData.product ?? productData)
+        setProduct(productData.product ?? productData);
 
-            const user = userData.user
+        const user = userData.user;
 
-            setIsAdmin(user.role === 'admin')
-
-
-        }catch(error){
-            setError(error instanceof Error ? error.message : "something went wrong")
-        }finally{
-            setLoading(false)
-        }
-    }
-
-    fetchDetails()
- }, [id])
-
-  const handleDelete = async () => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this product?",
-    );
-
-    if (!confirmDelete) return;
-
-    try {
-      setDeleting(true);
-
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/products/${id}`,
-        {
-          method: "DELETE",
-          credentials: "include",
-        },
-      );
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.message || "Delete failed");
+        setIsAdmin(user.role === "admin");
+      } catch (error) {
+        setError(
+          error instanceof Error ? error.message : "something went wrong",
+        );
+      } finally {
+        setLoading(false);
       }
+    };
 
-      alert("Product deleted successfully!");
-      router.push("/");
-      router.refresh();
-    } catch (error) {
-      alert(error instanceof Error ? error.message : "Delete failed");
-    } finally {
-      setDeleting(false);
-    }
-  };
+    fetchDetails();
+  }, [id]);
+
+const handleDelete = async () => {
+  try {
+    await deleteProduct(id);
+
+    alert("Product deleted successfully");
+
+    router.push("/");
+
+  } catch (error) {
+    alert(error instanceof Error ? error.message : "Delete failed");
+  }
+};
 
   if (loading) return <Skeleton />;
   if (error) return <Message text={error} />;
