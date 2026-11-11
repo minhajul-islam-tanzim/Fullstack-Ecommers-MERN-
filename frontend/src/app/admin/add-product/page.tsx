@@ -2,6 +2,7 @@
 
 import { useState, FormEvent, ChangeEvent } from "react";
 import { createProduct } from "@/services/productService";
+import { useRouter } from "next/navigation";
 
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024; 
 
@@ -9,6 +10,8 @@ export default function AddProductPage() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [imageError, setImageError] = useState("");
+    const router = useRouter()
+
 
   const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -42,6 +45,8 @@ export default function AddProductPage() {
       );
     } finally {
       setLoading(false);
+      router.push("/")
+
     }
   };
 

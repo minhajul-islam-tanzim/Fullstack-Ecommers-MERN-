@@ -84,37 +84,31 @@ const ProductDetailsContent = () => {
   const [liked, setLiked] = useState(false);
 
 
-  useEffect(() => {
+ useEffect(() => {
     const fetchDetails = async () => {
-      try {
+
+        try{
+            const [productData, userData] = await Promise.all([
+                getProductById(id),
+                getMe().catch(() => null)
+            ])  
+            
+            setProduct(productData.product ?? productData)
+
+            const user = userData.user
+
+            setIsAdmin(user.role === 'admin')
 
 
-        const [productData, userData] = await Promise.all([
-          getProductById(id),
-          getMe().catch(() => null),
-        ]);
+        }catch(error){
+            setError(error instanceof Error ? error.message : "something went wrong")
+        }finally{
+            setLoading(false)
+        }
+    }
 
-        setProduct(productData.product ?? productData);
-
-        const user = userData?.user as User | undefined;
-        setIsAdmin(user?.role === "admin");
-
-
-
-
-      } catch (error) {
-        setError(
-          error instanceof Error ? error.message : "Something went wrong",
-        );
-
-        
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchDetails();
-  }, [id]);
+    fetchDetails()
+ }, [id])
 
   const handleDelete = async () => {
     const confirmDelete = window.confirm(
