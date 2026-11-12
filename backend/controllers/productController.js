@@ -117,3 +117,10 @@ exports.deleteProduct = async (req , res ) => {
     });
   }
 };
+
+exports.updateController = async (req, res, next) => {
+  const { id } = req.params;
+
+
+
+}
