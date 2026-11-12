@@ -120,6 +120,19 @@ exports.deleteProduct = async (req , res ) => {
 
 exports.updateController = async (req, res, next) => {
   const { id } = req.params;
+  const product = await Product.findById(id);
+
+  if (!product){
+    return res.status(404).json({
+      success: false ,
+      message: "product not found "
+    })
+  }
+
+  res.json(200).json({
+    success: true,
+    message:"Product match successfully"
+  })
 
 
 
