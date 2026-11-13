@@ -5,6 +5,8 @@ import { createProduct } from "@/services/productService";
 import { useRouter } from "next/navigation";
 
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
+
+
 const SIZE_PRESETS = ["XS", "S", "M", "L", "XL", "XXL"];
 const GENDERS = ["Men", "Women", "Kids"];
 const CATEGORIES = ["T-shirt", "Shirt", "Pant", "Shoes", "Top"];
