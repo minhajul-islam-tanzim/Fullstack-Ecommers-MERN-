@@ -311,7 +311,7 @@ const handleDelete = async () => {
               </p>
               <div className="mt-3 flex flex-wrap gap-3">
                 <button
-                  onClick={() => router.push(`/admin/products/edit/${id}`)}
+                  onClick={() => router.push(`/admin/edit-product/${id}`)}
                   className="font-(family-name:--font-lato) inline-flex items-center gap-2 rounded-full border border-[#292521] px-5 py-2 text-sm font-medium text-[#292521] transition-colors hover:bg-[#292521] hover:text-white"
                 >
                   <FiEdit2 size={15} />
