@@ -133,6 +133,7 @@ const EditProductForm = () => {
       setMessage(error instanceof Error ? error.message : "Product update failed");
     } finally {
       setUpdating(false);
+      router.push("/")
     }
   };
 

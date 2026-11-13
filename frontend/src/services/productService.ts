@@ -65,7 +65,7 @@ export const deleteProduct = async (id: string) => {
 };
 
 export const updateProduct = async (id: string, formData: FormData) => {
-    const res = await fetch(`${API_URL}/product/${id}`,{
+    const res = await fetch(`${API_URL}/products/${id}`,{
         method: "PUT",
         credentials: "include",
         body: formData,
