@@ -91,8 +91,7 @@ exports.getProductById = async (req, res) => {
   }
 };
 
-
-exports.deleteProduct = async (req , res ) => {
+exports.deleteProduct = async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -109,7 +108,6 @@ exports.deleteProduct = async (req , res ) => {
       success: true,
       message: "Product deleted successfully",
     });
-
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -118,22 +116,69 @@ exports.deleteProduct = async (req , res ) => {
   }
 };
 
+
+
+
+
 exports.updateController = async (req, res, next) => {
-  const { id } = req.params;
-  const product = await Product.findById(id);
-
-  if (!product){
-    return res.status(404).json({
-      success: false ,
-      message: "product not found "
-    })
-  }
-
-  res.json(200).json({
-    success: true,
-    message:"Product match successfully"
-  })
 
 
+  try{
+ const { id } = req.params;
 
+    const product = await Product.findById(id);
+
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: "Product not found",
+      });
+    }
+
+    const {
+      name,
+      gender,
+      category,
+      description,
+      price,
+      stock,
+      sizes,
+      colors,
+    } = req.body;
+
+    // Update product fields
+    product.name = name ?? product.name;
+    product.gender = gender ?? product.gender;
+    product.category = category ?? product.category;
+    product.description = description ?? product.description;
+    product.price = price ?? product.price;
+    product.stock = stock ?? product.stock;
+
+    product.sizes = sizes
+      ? sizes.split(",").map((size) => size.trim()).filter(Boolean)
+      : product.sizes;
+
+    product.colors = colors
+      ? colors.split(",").map((color) => color.trim()).filter(Boolean)
+      : product.colors;
+
+    // Update image if a new image is uploaded
+    if (req.file) {
+      product.image = req.file.path;
+    }
+
+    await product.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Product updated successfully",
+      product,
+    });
+} catch(error){
+  res.status(500).json({
+      success: false,
+      message: "Failed to delete product",
+    });
 }
+  
+};
