@@ -75,7 +75,7 @@ const HeroSlider = () => {
                   fill
                   priority={i < 3}
                   sizes="384px"
-                  className="object-contain"
+                  className="object-cover"
                 />
                 <span
                   aria-hidden

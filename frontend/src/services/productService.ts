@@ -63,3 +63,21 @@ export const deleteProduct = async (id: string) => {
 
   return data;
 };
+
+export const updateProduct = async (id: string, formData: FormData) => {
+    const res = await fetch(`${API_URL}/product/${id}`,{
+        method: "PUT",
+        credentials: "include",
+        body: formData,
+    })
+
+    const data = await res.json();
+
+      if (!res.ok) {
+    throw new Error(data.message || "Product update failed");
+
+}
+
+return data;
+
+}
