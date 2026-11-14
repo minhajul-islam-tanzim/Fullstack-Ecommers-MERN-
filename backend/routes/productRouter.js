@@ -9,11 +9,28 @@ const isAuth = require("../middlewares/isAuth")
 const isAdmin = require("../middlewares/isAdmin")
 
 
-productRouter.post("/", isAuth, isAdmin,  upload.single("image"), createProduct)
+productRouter.post("/", isAuth, isAdmin,
+
+    upload.fields([
+        {name: "mainImage", maxCount: 1},
+        { name: "additionalImages", maxCount: 3 }
+    ]),
+      
+      createProduct)
+
+      
 productRouter.get("/", getAllProducts)
 productRouter.get("/:id", getProductById)
 productRouter.delete("/:id",isAuth, isAdmin,deleteProduct)
-productRouter.put("/:id", isAuth, isAdmin, upload.single("image"),
+
+
+productRouter.put("/:id", isAuth, isAdmin, 
+
+  upload.fields([
+    { name: "mainImage", maxCount: 1 }, 
+    { name: "additionalImages", maxCount: 3 }, 
+  ]),
+
 updateController)
 
 module.exports = productRouter;
