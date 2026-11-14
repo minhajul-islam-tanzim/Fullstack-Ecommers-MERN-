@@ -24,10 +24,40 @@ const productSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    image: {
-      type: String,
-      required: true,
+    
+    
+mainImage: {
+  url: {
+    type: String,
+    required: true,
+  },
+  public_id: {
+    type: String,
+    required: true,
+  },
+},
+
+additionalImages: {
+  type: [
+    {
+      url: {
+        type: String,
+        required: true,
+      },
+      public_id: {
+        type: String,
+        required: true,
+      },
     },
+  ],
+  validate: {
+    validator: (images) => images.length <= 3,
+    message: "Maximum 3 additional images allowed",
+  },
+  default: [],
+}
+    
+    ,
     sizes: {
       type: [String],
       default: [],
