@@ -8,10 +8,17 @@ const uploadToCloudinary = (buffer) => {
       { folder: "fashion-products" },
       (error, result) => {
         if (error) return reject(error);
-        resolve(result.secure_url);
+        resolve(
+          {
+            url:  result.secure_url,
+            public_id: result.public_id
+
+          }
+
+        );
       },
     );
-    Readable.from(buffer).pipe(stream);
+    Readable.from([buffer]).pipe(stream);
   });
 };
 
@@ -26,7 +33,14 @@ exports.createProduct = async (req, res) => {
       });
     }
 
-    const imageUrl = await uploadToCloudinary(req.file.buffer);
+
+const mainImage = await uploadToCloudinary(
+  req.files.mainImage[0].buffer
+);
+
+const additionalImage = await Promise.all(
+  (req.files.additionalImages || []).map((file) => uploadToCloudinary(file.buffer))
+)
 
     const product = await Product.create({
       name,
@@ -34,7 +48,10 @@ exports.createProduct = async (req, res) => {
       description,
       price,
       category,
-      image: imageUrl,
+
+      mainImage,
+      additionalImages,
+
       sizes: sizes ? sizes.split(",") : [],
       colors: colors ? colors.split(",") : [],
       stock: stock || 0,
