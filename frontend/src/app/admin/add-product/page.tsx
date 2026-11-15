@@ -224,7 +224,7 @@ export default function AddProductPage() {
     }
   };
 
-  // Common input styling
+  
   const inputClass =
     "w-full rounded-lg border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-900 placeholder:text-neutral-400 outline-none transition focus:border-indigo-600 focus:ring-4 focus:ring-indigo-600/15";
 
