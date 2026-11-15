@@ -1,8 +1,9 @@
 
 "use client";
 
-import { useState, useEffect, FormEvent, ChangeEvent } from "react";
-import type { ReactNode } from "react";
+import { useState, useEffect } from "react";
+import type { FormEvent, ChangeEvent, ReactNode } from "react";
+
 import { createProduct } from "@/services/productService";
 import { useRouter } from "next/navigation";
 
@@ -178,6 +179,8 @@ export default function AddProductPage() {
     e.preventDefault();
 
     const form = e.currentTarget;
+
+    
 
     // Collect all form fields and selected files
     const formData = new FormData(form);

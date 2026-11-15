@@ -24,23 +24,27 @@ const uploadToCloudinary = (buffer) => {
 
 exports.createProduct = async (req, res) => {
   try {
-    const { name, gender, description, price, category, sizes, colors, stock } =
-      req.body;
-
-    if (!req.file) {
+    
+    if (!req.files?.mainImage?.[0]) {
       return res.status(400).json({
         message: "Product image is required",
       });
     }
 
+    const { name, gender, description, price, category, sizes, colors, stock } =
+      req.body;
 
-const mainImage = await uploadToCloudinary(
-  req.files.mainImage[0].buffer
-);
+    // Main image Cloudinary upload
+    const mainImage = await uploadToCloudinary(
+      req.files.mainImage[0].buffer
+    );
 
-const additionalImage = await Promise.all(
-  (req.files.additionalImages || []).map((file) => uploadToCloudinary(file.buffer))
-)
+    // Additional images Cloudinary upload
+    const additionalImages = await Promise.all(
+      (req.files.additionalImages || []).map((file) =>
+        uploadToCloudinary(file.buffer)
+      )
+    );
 
     const product = await Product.create({
       name,
@@ -48,10 +52,8 @@ const additionalImage = await Promise.all(
       description,
       price,
       category,
-
       mainImage,
-      additionalImages,
-
+      additionalImages, 
       sizes: sizes ? sizes.split(",") : [],
       colors: colors ? colors.split(",") : [],
       stock: stock || 0,
@@ -68,7 +70,6 @@ const additionalImage = await Promise.all(
     });
   }
 };
-
 exports.getAllProducts = async (req, res) => {
   try {
     const products = await Product.find().sort({ createdAt: -1 });
