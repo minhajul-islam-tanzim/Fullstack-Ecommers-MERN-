@@ -39,7 +39,7 @@ exports.createProduct = async (req, res) => {
       req.files.mainImage[0].buffer
     );
 
-    // Additional images Cloudinary upload
+    // Additional images upload in cloudinary
     const additionalImages = await Promise.all(
       (req.files.additionalImages || []).map((file) =>
         uploadToCloudinary(file.buffer)
