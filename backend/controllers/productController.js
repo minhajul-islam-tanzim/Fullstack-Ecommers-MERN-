@@ -143,7 +143,6 @@ exports.deleteProduct = async (req, res) => {
 
 exports.updateController = async (req, res, next) => {
 
-
   try{
  const { id } = req.params;
 
@@ -184,11 +183,25 @@ exports.updateController = async (req, res, next) => {
       : product.colors;
 
     // Update image if a new image is uploaded
-    if (req.file) {
-      product.image = req.file.path;
-    }
+
+    if (req.files?.mainImage?.[0]) {
+      
+      const imageBuffer = req.files.mainImage[0].buffer;
+
+        const uploadedImage = await uploadToCloudinary(imageBuffer)
+
+        product.mainImage = {
+          url: uploadedImage.url,
+          public_id : uploadedImage.public_id,
+        }
+          console.log("3. Product image updated:", product.mainImage);
+
+      }
+
+
 
     await product.save();
+    console.log("SAVED PRODUCT:", product.mainImage);
 
     return res.status(200).json({
       success: true,

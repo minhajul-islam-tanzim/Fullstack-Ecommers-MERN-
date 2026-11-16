@@ -61,7 +61,6 @@ function EditProductForm() {
     const fetchProduct = async () => {
       try {
         const data = await getProductById(id);
-
         setProduct(data);
         setName(data.name || "");
         setPrice(String(data.price ?? ""));
@@ -157,9 +156,6 @@ function EditProductForm() {
       formData.append("mainImage", mainImage);
     }
 
-    additionalImages.forEach((file) => {
-      formData.append("additionalImages", file);
-    });
 
     try {
       setUpdating(true);
@@ -177,6 +173,7 @@ function EditProductForm() {
       );
     } finally {
       setUpdating(false);
+      router.push("/")
     }
   };
 

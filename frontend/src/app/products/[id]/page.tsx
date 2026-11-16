@@ -1,20 +1,10 @@
+
 "use client";
 
 import { useEffect, useState, Suspense } from "react";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
-import {
-  FiArrowLeft,
-  FiArrowRight,
-  FiX,
-  FiHeart,
-  FiShoppingBag,
-  FiEdit,
-  FiTrash2,
-} from "react-icons/fi";
-
 import { getProductById } from "@/services/productService";
-
 import { getMe } from "@/services/authService";
 
 interface ProductImage {
@@ -25,10 +15,10 @@ interface ProductImage {
 interface Product {
   _id: string;
   name: string;
-  gender: string;
-  description: string;
   price: number;
   category: string;
+  gender: string;
+  description: string;
   mainImage: ProductImage;
   additionalImages: ProductImage[];
   sizes: string[];
@@ -36,16 +26,8 @@ interface Product {
   stock: number;
 }
 
-interface User {
-  role: string;
-}
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
-
 function ProductDetailsPage() {
-
   const { id } = useParams<{ id: string }>();
-
   const router = useRouter();
 
   const [product, setProduct] = useState<Product | null>(null);
@@ -53,342 +35,214 @@ function ProductDetailsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const [activeImageIndex, setActiveImageIndex] = useState(0);
-  const [isImageOpen, setIsImageOpen] = useState(false);
-
+  const [activeImage, setActiveImage] = useState(0);
   const [selectedSize, setSelectedSize] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
 
-  // Fetch product and current user
-
+  // Fetch product
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchProduct = async () => {
       try {
         setLoading(true);
-        setError("");
 
         const [productData, userData] = await Promise.all([
           getProductById(id),
           getMe().catch(() => null),
         ]);
 
-
-
-        setProduct(productData)
- setIsAdmin(userData?.user?.role === "admin");
-        
-      } catch (error: any) {
-          setError(error.message || "Failed to fetch product");
-      }finally{
-        setLoading(false)
+        setProduct(productData);
+        setIsAdmin(userData?.user?.role === "admin");
+        setActiveImage(0);
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "Product not found"
+        );
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchData()
+    fetchProduct();
   }, [id]);
 
   if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-[#F5F0E8]">
-        <p className="text-lg text-[#292521]">Loading product...</p>
-      </div>
-    );
+    return <div className="p-10 text-center">Loading product...</div>;
   }
 
   if (error || !product) {
-    return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-5 bg-[#F5F0E8]">
-        <p className="text-lg text-red-500">{error || "Product not found"}</p>
-
-        <button
-          onClick={() => router.back()}
-          className="rounded-xl bg-[#292521] px-6 py-3 text-white"
-        >
-          Go Back
-        </button>
-      </div>
-    );
+    return <div className="p-10 text-center text-red-500">
+      {error || "Product not found"}
+    </div>;
   }
 
-  // 1 main image + max 3 additional images
-  const allImages: ProductImage[] = [
+  // All product images
+  const images = [
     product.mainImage,
-    ...(product.additionalImages || []).slice(0, 3),
-  ];
-
-  const previousImage = () => {
-    setActiveImageIndex(
-      (current) => (current - 1 + allImages.length) % allImages.length,
-    );
-  };
-
-  const nextImage = () => {
-    setActiveImageIndex((current) => (current + 1) % allImages.length);
-  };
-
-  const handleDelete = async () => {
-  
-  };
+    ...(product.additionalImages || []),
+  ].filter((image) => image?.url);
 
   return (
-    <main className="min-h-screen bg-[#F5F0E8] px-4 py-8 md:px-10 lg:px-16">
-      {/* Back button */}
-      <div className="mx-auto mb-8 max-w-7xl">
+    <main className="min-h-screen bg-[#F5F0E8] px-4 py-10 md:px-10">
+
+      <div className="mx-auto max-w-6xl">
+
         <button
           onClick={() => router.back()}
-          className="flex items-center gap-2 text-sm text-[#77716A] transition hover:text-[#292521]"
+          className="mb-8 text-[#77716A]"
         >
-          <FiArrowLeft />
-          Back
+          ← Back
         </button>
-      </div>
 
-      <section className="mx-auto grid max-w-7xl grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-16">
-        {/* LEFT: Image gallery */}
-        <div className="flex flex-col gap-4 sm:flex-row">
-          {/* Thumbnails */}
-          <div className="order-2 flex gap-3 overflow-x-auto pb-2 sm:order-1 sm:w-24 sm:shrink-0 sm:flex-col sm:overflow-y-auto sm:overflow-x-hidden sm:pb-0">
-            {allImages.map((image, index) => (
-              <button
-                key={image.public_id || index}
-                onClick={() => setActiveImageIndex(index)}
-                className={`relative h-24 w-20 shrink-0 overflow-hidden rounded-xl border-2 transition-all duration-300 sm:h-28 sm:w-full ${
-                  activeImageIndex === index
-                    ? "border-[#B58A62] opacity-100"
-                    : "border-transparent opacity-60 hover:border-[#B58A62] hover:opacity-100"
-                }`}
-              >
-                <Image
-                  src={image.url}
-                  alt={`${product.name} image ${index + 1}`}
-                  fill
-                  sizes="96px"
-                  className="object-cover"
-                />
-              </button>
-            ))}
+        <div className="grid gap-10 md:grid-cols-2">
+
+          {/* Product Images */}
+          <div>
+            {images.length > 0 && (
+              <>
+                <div className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-white">
+                  <Image
+                    key={images[activeImage].url}
+                    src={images[activeImage].url}
+                    alt={product.name}
+                    fill
+                    unoptimized
+                    className="object-cover"
+                  />
+                </div>
+
+                <div className="mt-4 flex gap-3 overflow-x-auto">
+                  {images.map((image, index) => (
+                    <button
+                      key={image.public_id || index}
+                      onClick={() => setActiveImage(index)}
+                      className={`relative h-20 w-16 shrink-0 overflow-hidden rounded-lg border-2 ${
+                        activeImage === index
+                          ? "border-[#B58A62]"
+                          : "border-transparent"
+                      }`}
+                    >
+                      <Image
+                        src={image.url}
+                        alt="Product thumbnail"
+                        fill
+                        unoptimized
+                        className="object-cover"
+                      />
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
           </div>
 
-          {/* Main image */}
-          <div className="relative order-1 aspect-[4/5] w-full overflow-hidden rounded-3xl bg-white sm:order-2 sm:flex-1">
-            <button
-              type="button"
-              onClick={() => setIsImageOpen(true)}
-              aria-label="Open product image"
-              className="absolute inset-0 z-0 cursor-zoom-in"
-            >
-              <Image
-                src={allImages[activeImageIndex].url}
-                alt={product.name}
-                fill
-                priority
-                sizes="(min-width: 1024px) 50vw, 100vw"
-                className="object-cover transition-transform duration-500 hover:scale-105"
-              />
-            </button>
+          {/* Product Information */}
+          <div className="flex flex-col justify-center">
 
-            {/* Wishlist */}
-            <button
-              type="button"
-              aria-label="Add to wishlist"
-              className="absolute right-5 top-5 z-10 rounded-full bg-white p-3 text-[#292521] shadow-md transition hover:bg-[#B58A62] hover:text-white"
-            >
-              <FiHeart size={20} />
-            </button>
+            <p className="mb-3 text-sm uppercase tracking-widest text-[#B58A62]">
+              {product.category}
+            </p>
 
-            {/* Counter */}
-            <div className="absolute bottom-5 right-5 z-10 rounded-full bg-black/50 px-4 py-2 text-sm text-white">
-              {activeImageIndex + 1} / {allImages.length}
-            </div>
-          </div>
-        </div>
+            <h1 className="mb-4 text-3xl font-semibold text-[#292521]">
+              {product.name}
+            </h1>
 
-        {/* RIGHT: Product info */}
-        <div className="flex flex-col justify-center py-4">
-          <p className="mb-3 text-sm uppercase tracking-[0.25em] text-[#B58A62]">
-            {product.category}
-          </p>
+            <p className="mb-5 text-2xl font-medium">
+              ৳ {product.price}
+            </p>
 
-          <h1 className="mb-4 text-3xl font-semibold tracking-tight text-[#292521] md:text-5xl">
-            {product.name}
-          </h1>
+            <p className="mb-6 leading-7 text-[#77716A]">
+              {product.description}
+            </p>
 
-          <p className="mb-6 text-2xl font-medium text-[#292521]">
-            ৳ {product.price}
-          </p>
+            {/* Size */}
+            {product.sizes?.length > 0 && (
+              <div className="mb-6">
+                <h3 className="mb-3 font-semibold">Select Size</h3>
 
-          <div className="mb-6 h-px bg-[#D9D0C5]" />
-
-          <p className="mb-8 leading-7 text-[#77716A]">{product.description}</p>
-
-          {/* Sizes */}
-          {product.sizes?.length > 0 && (
-            <div className="mb-7">
-              <div className="mb-3 flex items-center justify-between">
-                <h3 className="font-semibold text-[#292521]">Select Size</h3>
-                <span className="text-sm text-[#77716A]">
-                  {selectedSize || "Choose your size"}
-                </span>
+                <div className="flex flex-wrap gap-3">
+                  {product.sizes.map((size) => (
+                    <button
+                      key={size}
+                      onClick={() => setSelectedSize(size)}
+                      className={`rounded-lg border px-4 py-2 ${
+                        selectedSize === size
+                          ? "bg-[#292521] text-white"
+                          : "border-gray-300"
+                      }`}
+                    >
+                      {size}
+                    </button>
+                  ))}
+                </div>
               </div>
+            )}
 
-              <div className="flex flex-wrap gap-3">
-                {product.sizes.map((size) => (
-                  <button
-                    key={size}
-                    onClick={() => setSelectedSize(size)}
-                    className={`min-w-12 rounded-lg border px-4 py-3 text-sm transition ${
-                      selectedSize === size
-                        ? "border-[#292521] bg-[#292521] text-white"
-                        : "border-[#D9D0C5] text-[#292521] hover:border-[#B58A62]"
-                    }`}
-                  >
-                    {size}
-                  </button>
-                ))}
+            {/* Color */}
+            {product.colors?.length > 0 && (
+              <div className="mb-6">
+                <h3 className="mb-3 font-semibold">Select Color</h3>
+
+                <div className="flex flex-wrap gap-3">
+                  {product.colors.map((color) => (
+                    <button
+                      key={color}
+                      onClick={() => setSelectedColor(color)}
+                      className={`rounded-lg border px-4 py-2 ${
+                        selectedColor === color
+                          ? "border-[#B58A62] bg-[#B58A62]/10"
+                          : "border-gray-300"
+                      }`}
+                    >
+                      {color}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Colors */}
-          {product.colors?.length > 0 && (
-            <div className="mb-7">
-              <h3 className="mb-3 font-semibold text-[#292521]">
-                Available Colors
-              </h3>
-
-              <div className="flex flex-wrap gap-3">
-                {product.colors.map((color) => (
-                  <button
-                    key={color}
-                    onClick={() => setSelectedColor(color)}
-                    className={`rounded-lg border px-4 py-2 text-sm transition ${
-                      selectedColor === color
-                        ? "border-[#B58A62] bg-[#B58A62]/10 text-[#292521]"
-                        : "border-[#D9D0C5] text-[#77716A]"
-                    }`}
-                  >
-                    {color}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Stock */}
-          <p
-            className={`mb-7 text-sm ${
+            {/* Stock */}
+            <p className={`mb-6 ${
               product.stock > 0 ? "text-green-700" : "text-red-500"
-            }`}
-          >
-            {product.stock > 0
-              ? `${product.stock} items available`
-              : "Out of stock"}
-          </p>
+            }`}>
+              {product.stock > 0
+                ? `${product.stock} items available`
+                : "Out of stock"}
+            </p>
 
-          {/* Add to cart */}
-          <button
-            type="button"
-            disabled={
-              product.stock <= 0 ||
-              (product.sizes?.length > 0 && !selectedSize) ||
-              (product.colors?.length > 0 && !selectedColor)
-            }
-            className="flex w-full items-center justify-center gap-3 rounded-xl bg-[#292521] px-6 py-4 font-medium text-white transition hover:bg-[#B58A62] disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            <FiShoppingBag size={20} />
-            Add to Cart
-          </button>
+            {/* Add to Cart */}
+            <button
+              disabled={
+                product.stock <= 0 ||
+                (product.sizes?.length > 0 && !selectedSize) ||
+                (product.colors?.length > 0 && !selectedColor)
+              }
+              className="rounded-xl bg-[#292521] px-6 py-4 text-white disabled:opacity-40"
+            >
+              Add to Cart
+            </button>
 
-          {/* Admin controls */}
-
-          {isAdmin && (
-            <div className="mt-5 flex gap-3">
+            {/* Admin Edit Button */}
+            {isAdmin && (
               <button
                 onClick={() =>
-  router.push(`/admin/edit-product/${product._id}`)
+                  router.push(`/admin/edit-product/${product._id}`)
                 }
-                className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-[#D9D0C5] py-3 text-[#292521] transition hover:bg-white"
+                className="mt-4 rounded-xl border border-[#292521] px-6 py-3"
               >
-                <FiEdit />
                 Edit Product
               </button>
+            )}
 
-              <button
-                onClick={handleDelete}
-                className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-red-200 py-3 text-red-500 transition hover:bg-red-50"
-              >
-                <FiTrash2 />
-                Delete
-              </button>
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* Fullscreen lightbox */}
-      {isImageOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 p-4"
-          onClick={() => setIsImageOpen(false)}
-        >
-          <button
-            type="button"
-            onClick={() => setIsImageOpen(false)}
-            aria-label="Close image"
-            className="absolute right-5 top-5 z-50 rounded-full bg-white/10 p-3 text-white transition hover:bg-white/20"
-          >
-            <FiX size={25} />
-          </button>
-
-          <button
-            type="button"
-            onClick={(event) => {
-              event.stopPropagation();
-              previousImage();
-            }}
-            aria-label="Previous image"
-            className="absolute left-3 z-50 rounded-full bg-white/15 p-3 text-white transition hover:bg-white/30 md:left-8"
-          >
-            <FiArrowLeft size={25} />
-          </button>
-
-          <div
-            className="relative h-[80vh] w-full max-w-5xl"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <Image
-              src={allImages[activeImageIndex].url}
-              alt={product.name}
-              fill
-              sizes="90vw"
-              className="object-contain"
-            />
           </div>
-
-          <button
-            type="button"
-            onClick={(event) => {
-              event.stopPropagation();
-              nextImage();
-            }}
-            aria-label="Next image"
-            className="absolute right-3 z-50 rounded-full bg-white/15 p-3 text-white transition hover:bg-white/30 md:right-8"
-          >
-            <FiArrowRight size={25} />
-          </button>
-
-          <p className="absolute bottom-5 text-sm text-white">
-            {activeImageIndex + 1} / {allImages.length}
-          </p>
         </div>
-      )}
+      </div>
     </main>
   );
 }
 
 export default function Page() {
   return (
-    <Suspense fallback={<p className="text-red-600">Loading...</p>}>
+    <Suspense fallback={<p className="p-10 text-center">Loading...</p>}>
       <ProductDetailsPage />
     </Suspense>
   );
