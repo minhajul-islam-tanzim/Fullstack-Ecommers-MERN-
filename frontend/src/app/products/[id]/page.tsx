@@ -227,7 +227,7 @@ function ProductDetailsPage() {
                 onClick={() =>
                   router.push(`/admin/edit-product/${product._id}`)
                 }
-                className="mt-4 rounded-xl border border-[#292521] px-6 py-3"
+                className="mt-4 rounded-xl border border-[#292521] px-6 py-3 hover:cursor-pointer hover:bg-gray-300"
               >
                 Edit Product
               </button>
