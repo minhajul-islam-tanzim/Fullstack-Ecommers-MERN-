@@ -1,3 +1,5 @@
+import axios from "axios";
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export const createProduct = async (formData: FormData) => {
@@ -35,16 +37,14 @@ export const getAllProducts = async () => {
 
 
 export const getProductById = async (id: string) => {
-    const res = await fetch(`${API_URL}/products/${id}`, {
-        cache: "no-store"
-    });
-    const data = await res.json();
-
-     if (!res.ok) {
-    throw new Error(data.message || "Product not found");
-  }
-
-  return data.product;
+    try{
+        const res = await axios.get(`${API_URL}/products/${id}`)
+        return res.data.product;
+    }catch(error: any){
+         throw new Error(
+      error.response?.data?.message || "Product not found"
+    );
+    }
 
 }
 
