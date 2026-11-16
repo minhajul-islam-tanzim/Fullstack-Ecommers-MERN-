@@ -137,45 +137,32 @@ function EditProductForm() {
 
   // Update product
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    if (!product) return;
+  if (!product) return;
 
-    const formData = new FormData();
+  const formData = new FormData(e.currentTarget);
 
-    formData.append("name", name);
-    formData.append("price", price);
-    formData.append("category", category);
-    formData.append("gender", gender);
-    formData.append("description", description);
-    formData.append("stock", stock);
-    formData.append("sizes", sizes.join(","));
-    formData.append("colors", colors.join(","));
+  try {
+    setUpdating(true);
+    setError("");
+    setMessage("");
 
-    if (mainImage) {
-      formData.append("mainImage", mainImage);
-    }
+    await updateProduct(id, formData);
 
+    setMessage("Product updated successfully!");
 
-    try {
-      setUpdating(true);
-      setError("");
-      setMessage("");
+    router.push("/");
+    router.refresh();
 
-      await updateProduct(id, formData);
-
-      setMessage("Product updated successfully!");
-      router.push("/admin/products");
-      router.refresh();
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Product update failed"
-      );
-    } finally {
-      setUpdating(false);
-      router.push("/")
-    }
-  };
+  } catch (err) {
+    setError(
+      err instanceof Error ? err.message : "Product update failed"
+    );
+  } finally {
+    setUpdating(false);
+  }
+};
 
   if (loading) {
     return (
@@ -242,6 +229,7 @@ function EditProductForm() {
 
             <input
               type="file"
+              name="mainImage"
               accept="image/*"
               onChange={handleMainImage}
               className="mt-2 w-full text-sm"

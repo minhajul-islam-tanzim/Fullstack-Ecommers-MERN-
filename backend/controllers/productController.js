@@ -142,6 +142,9 @@ exports.deleteProduct = async (req, res) => {
 
 
 exports.updateController = async (req, res, next) => {
+  console.log("FILES:", req.files);
+console.log("BODY:", req.body);
+console.log("NEW IMAGE:", req.files?.mainImage?.[0]);
 
   try{
  const { id } = req.params;

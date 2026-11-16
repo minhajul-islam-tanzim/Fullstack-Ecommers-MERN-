@@ -27,6 +27,7 @@ interface Product {
 }
 
 function ProductDetailsPage() {
+
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
 
@@ -34,22 +35,24 @@ function ProductDetailsPage() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-
+  
   const [activeImage, setActiveImage] = useState(0);
   const [selectedSize, setSelectedSize] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
-
+  
   // Fetch product
   useEffect(() => {
     const fetchProduct = async () => {
       try {
         setLoading(true);
-
+        
         const [productData, userData] = await Promise.all([
           getProductById(id),
           getMe().catch(() => null),
         ]);
-
+        console.log("User role:", userData?.user?.role);
+      console.log("Is Admin:", isAdmin);
+        
         setProduct(productData);
         setIsAdmin(userData?.user?.role === "admin");
         setActiveImage(0);
