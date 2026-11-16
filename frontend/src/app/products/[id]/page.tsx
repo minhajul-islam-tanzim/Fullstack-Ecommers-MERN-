@@ -1,23 +1,23 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
-import Link from "next/link";
+import { useEffect, useState, Suspense } from "react";
 import Image from "next/image";
-
 import { useParams, useRouter } from "next/navigation";
+import axios from "axios";
 import {
   FiArrowLeft,
-  FiArrowUpRight,
-  FiMinus,
-  FiPlus,
-  FiEdit2,
+  FiArrowRight,
+  FiX,
+  FiHeart,
+  FiShoppingBag,
+  FiEdit,
   FiTrash2,
-  FiTruck,
-  FiRefreshCcw,
 } from "react-icons/fi";
-import { FaHeart, FaRegHeart } from "react-icons/fa6";
-import { deleteProduct, getProductById } from "@/services/productService";
-import { getMe } from "@/services/authService";
+
+interface ProductImage {
+  url: string;
+  public_id: string;
+}
 
 interface Product {
   _id: string;
@@ -26,188 +26,246 @@ interface Product {
   description: string;
   price: number;
   category: string;
-  image: string;
+  mainImage: ProductImage;
+  additionalImages: ProductImage[];
   sizes: string[];
   colors: string[];
   stock: number;
 }
 
 interface User {
-  id: string;
-  name: string;
-  email: string;
   role: string;
 }
 
-const Skeleton = () => (
-  <div className="mx-auto grid max-w-7xl animate-pulse gap-8 px-4 py-10 md:grid-cols-2 md:gap-14 md:px-8 md:py-14">
-    <div className="aspect-4/5 rounded-3xl bg-[#EEF3F5]" />
-    <div className="space-y-5 py-4">
-      <div className="h-4 w-32 rounded bg-[#EEF3F5]" />
-      <div className="h-12 w-3/4 rounded bg-[#EEF3F5]" />
-      <div className="h-8 w-28 rounded bg-[#EEF3F5]" />
-      <div className="h-24 w-full rounded bg-[#EEF3F5]" />
-      <div className="h-12 w-full rounded-full bg-[#EEF3F5]" />
-    </div>
-  </div>
-);
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-const Message = ({ text }: { text: string }) => (
-  <div className="mx-auto flex max-w-7xl flex-col items-center px-4 py-24 text-center">
-    <p className="font-(family-name:--font-playfair) text-3xl font-bold text-[#292521] md:text-4xl">
-      {text}
-    </p>
-    <Link
-      href="/"
-      className="group mt-8 inline-flex items-center gap-3 rounded-full bg-[#292521] py-2 pl-6 pr-2 text-sm font-medium text-white transition-colors hover:bg-black"
-    >
-      Back to home
-      <span className="flex h-9 w-9 items-center justify-center rounded-full bg-orange-500 transition-transform group-hover:rotate-45">
-        <FiArrowUpRight size={18} />
-      </span>
-    </Link>
-  </div>
-);
-
-const ProductDetailsContent = () => {
-  const router = useRouter();
+function ProductDetailsPage() {
   const { id } = useParams<{ id: string }>();
+  const router = useRouter();
 
   const [product, setProduct] = useState<Product | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [deleting, setDeleting] = useState(false);
 
-  const [size, setSize] = useState("");
-  const [color, setColor] = useState("");
-  const [qty, setQty] = useState(1);
-  const [liked, setLiked] = useState(false);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [isImageOpen, setIsImageOpen] = useState(false);
 
+  const [selectedSize, setSelectedSize] = useState("");
+  const [selectedColor, setSelectedColor] = useState("");
+
+  // Fetch product and current user
   useEffect(() => {
-    const fetchDetails = async () => {
+    if (!id) return;
+
+    const fetchProduct = async () => {
       try {
-        const [productData, userData] = await Promise.all([
-          getProductById(id),
-          getMe().catch(() => null),
+        setLoading(true);
+        setError("");
+
+        const productRequest = axios.get(`${API_URL}/products/${id}`);
+
+        const userRequest = axios
+          .get(`${API_URL}/auth/me`, { withCredentials: true })
+          .catch(() => null);
+
+        const [productResponse, userResponse] = await Promise.all([
+          productRequest,
+          userRequest,
         ]);
 
-        setProduct(productData.product ?? productData);
+        setProduct(productResponse.data.product);
+        setActiveImageIndex(0);
 
-        const user = userData.user;
-
-        setIsAdmin(user.role === "admin");
-      } catch (error) {
-        setError(
-          error instanceof Error ? error.message : "something went wrong",
-        );
+        if (userResponse) {
+          const user: User | undefined = userResponse.data.user;
+          setIsAdmin(user?.role === "admin");
+        }
+      } catch (err) {
+        console.error("Product fetch error:", err);
+        setError("Failed to load product.");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchDetails();
+    fetchProduct();
   }, [id]);
 
-const handleDelete = async () => {
-  try {
-    await deleteProduct(id);
-
-    alert("Product deleted successfully");
-
-    router.push("/");
-
-  } catch (error) {
-    alert(error instanceof Error ? error.message : "Delete failed");
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#F5F0E8]">
+        <p className="text-lg text-[#292521]">Loading product...</p>
+      </div>
+    );
   }
-};
 
-  if (loading) return <Skeleton />;
-  if (error) return <Message text={error} />;
-  if (!product) return <Message text="Product not found" />;
+  if (error || !product) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center gap-5 bg-[#F5F0E8]">
+        <p className="text-lg text-red-500">{error || "Product not found"}</p>
 
-  const inStock = product.stock > 0;
+        <button
+          onClick={() => router.back()}
+          className="rounded-xl bg-[#292521] px-6 py-3 text-white"
+        >
+          Go Back
+        </button>
+      </div>
+    );
+  }
+
+  // 1 main image + max 3 additional images
+  const allImages: ProductImage[] = [
+    product.mainImage,
+    ...(product.additionalImages || []).slice(0, 3),
+  ];
+
+  const previousImage = () => {
+    setActiveImageIndex(
+      (current) => (current - 1 + allImages.length) % allImages.length
+    );
+  };
+
+  const nextImage = () => {
+    setActiveImageIndex((current) => (current + 1) % allImages.length);
+  };
+
+  const handleDelete = async () => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this product?"
+    );
+
+    if (!confirmed) return;
+
+    try {
+      await axios.delete(`${API_URL}/products/${product._id}`, {
+        withCredentials: true,
+      });
+
+      alert("Product deleted successfully!");
+      router.push("/");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to delete product.");
+    }
+  };
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 md:px-8 md:py-12">
-      {/* Back */}
-      <button
-        onClick={() => router.back()}
-        className="font-(family-name:--font-lato) inline-flex items-center gap-2 text-sm text-[#292521]/70 transition-colors hover:text-orange-500"
-      >
-        <FiArrowLeft size={16} />
-        Back
-      </button>
+    <main className="min-h-screen bg-[#F5F0E8] px-4 py-8 md:px-10 lg:px-16">
+      {/* Back button */}
+      <div className="mx-auto mb-8 max-w-7xl">
+        <button
+          onClick={() => router.back()}
+          className="flex items-center gap-2 text-sm text-[#77716A] transition hover:text-[#292521]"
+        >
+          <FiArrowLeft />
+          Back
+        </button>
+      </div>
 
-      <div className="mt-6 grid gap-8 md:grid-cols-2 md:gap-14">
-        {/* Image */}
-        <div className="relative aspect-4/5 overflow-hidden rounded-3xl bg-[#EEF3F5] md:sticky md:top-6 md:self-start">
-          <Image
-            src={product.image}
-            alt={product.name}
-            fill
-            priority
-            sizes="(min-width: 768px) 50vw, 100vw"
-            className="object-cover"
-          />
-
-          <button
-            onClick={() => setLiked(!liked)}
-            aria-label="Add to wishlist"
-            className="absolute right-4 top-4 flex h-11 w-11 items-center justify-center rounded-full bg-white/90 text-[#292521] backdrop-blur-md transition-transform hover:scale-110"
-          >
-            {liked ? (
-              <FaHeart size={17} className="text-orange-500" />
-            ) : (
-              <FaRegHeart size={17} />
-            )}
-          </button>
-        </div>
-
-        {/* Details */}
-        <div className="py-2">
-          {/* Tags */}
-          <div className="font-(family-name:--font-lato) flex flex-wrap items-center gap-2 text-xs">
-            <span className="rounded-full bg-[#EEF3F5] px-3 py-1 font-medium text-[#292521]">
-              {product.gender}
-            </span>
-            <span className="rounded-full bg-[#EEF3F5] px-3 py-1 font-medium text-[#292521]">
-              {product.category}
-            </span>
+      <section className="mx-auto grid max-w-7xl grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-16">
+        {/* LEFT: Image gallery */}
+        <div className="flex flex-col gap-4 sm:flex-row">
+          {/* Thumbnails */}
+          <div className="order-2 flex gap-3 overflow-x-auto pb-2 sm:order-1 sm:w-24 sm:shrink-0 sm:flex-col sm:overflow-y-auto sm:overflow-x-hidden sm:pb-0">
+            {allImages.map((image, index) => (
+              <button
+                key={image.public_id || index}
+                onClick={() => setActiveImageIndex(index)}
+                className={`relative h-24 w-20 shrink-0 overflow-hidden rounded-xl border-2 transition-all duration-300 sm:h-28 sm:w-full ${
+                  activeImageIndex === index
+                    ? "border-[#B58A62] opacity-100"
+                    : "border-transparent opacity-60 hover:border-[#B58A62] hover:opacity-100"
+                }`}
+              >
+                <Image
+                  src={image.url}
+                  alt={`${product.name} image ${index + 1}`}
+                  fill
+                  sizes="96px"
+                  className="object-cover"
+                />
+              </button>
+            ))}
           </div>
 
-          <h1 className="font-(family-name:--font-playfair) mt-4 text-4xl font-bold leading-[1.05] tracking-tight text-[#292521] md:text-5xl">
+          {/* Main image */}
+          <div className="relative order-1 aspect-[4/5] w-full overflow-hidden rounded-3xl bg-white sm:order-2 sm:flex-1">
+            <button
+              type="button"
+              onClick={() => setIsImageOpen(true)}
+              aria-label="Open product image"
+              className="absolute inset-0 z-0 cursor-zoom-in"
+            >
+              <Image
+                src={allImages[activeImageIndex].url}
+                alt={product.name}
+                fill
+                priority
+                sizes="(min-width: 1024px) 50vw, 100vw"
+                className="object-cover transition-transform duration-500 hover:scale-105"
+              />
+            </button>
+
+            {/* Wishlist */}
+            <button
+              type="button"
+              aria-label="Add to wishlist"
+              className="absolute right-5 top-5 z-10 rounded-full bg-white p-3 text-[#292521] shadow-md transition hover:bg-[#B58A62] hover:text-white"
+            >
+              <FiHeart size={20} />
+            </button>
+
+            {/* Counter */}
+            <div className="absolute bottom-5 right-5 z-10 rounded-full bg-black/50 px-4 py-2 text-sm text-white">
+              {activeImageIndex + 1} / {allImages.length}
+            </div>
+          </div>
+        </div>
+
+        {/* RIGHT: Product info */}
+        <div className="flex flex-col justify-center py-4">
+          <p className="mb-3 text-sm uppercase tracking-[0.25em] text-[#B58A62]">
+            {product.category}
+          </p>
+
+          <h1 className="mb-4 text-3xl font-semibold tracking-tight text-[#292521] md:text-5xl">
             {product.name}
           </h1>
 
-          <p className="font-(family-name:--font-playfair) mt-4 text-3xl font-semibold text-orange-500">
+          <p className="mb-6 text-2xl font-medium text-[#292521]">
             ৳ {product.price}
           </p>
 
-          <p className="font-(family-name:--font-lato) mt-5 max-w-xl text-base leading-7 text-[#292521]/75">
+          <div className="mb-6 h-px bg-[#D9D0C5]" />
+
+          <p className="mb-8 leading-7 text-[#77716A]">
             {product.description}
           </p>
 
-          <div className="my-7 h-px w-full bg-[#292521]/15" />
-
           {/* Sizes */}
           {product.sizes?.length > 0 && (
-            <div>
-              <p className="font-(family-name:--font-lato) text-sm font-medium text-[#292521]">
-                Size
-              </p>
-              <div className="mt-3 flex flex-wrap gap-2">
-                {product.sizes.map((s) => (
+            <div className="mb-7">
+              <div className="mb-3 flex items-center justify-between">
+                <h3 className="font-semibold text-[#292521]">Select Size</h3>
+                <span className="text-sm text-[#77716A]">
+                  {selectedSize || "Choose your size"}
+                </span>
+              </div>
+
+              <div className="flex flex-wrap gap-3">
+                {product.sizes.map((size) => (
                   <button
-                    key={s}
-                    onClick={() => setSize(s)}
-                    className={`font-(family-name:--font-lato) min-w-12 rounded-full border px-4 py-2 text-sm transition-colors ${
-                      size === s
+                    key={size}
+                    onClick={() => setSelectedSize(size)}
+                    className={`min-w-12 rounded-lg border px-4 py-3 text-sm transition ${
+                      selectedSize === size
                         ? "border-[#292521] bg-[#292521] text-white"
-                        : "border-[#292521]/30 text-[#292521] hover:border-[#292521]"
+                        : "border-[#D9D0C5] text-[#292521] hover:border-[#B58A62]"
                     }`}
                   >
-                    {s}
+                    {size}
                   </button>
                 ))}
               </div>
@@ -216,131 +274,144 @@ const handleDelete = async () => {
 
           {/* Colors */}
           {product.colors?.length > 0 && (
-            <div className="mt-6">
-              <p className="font-(family-name:--font-lato) text-sm font-medium text-[#292521]">
-                Color
-              </p>
-              <div className="mt-3 flex flex-wrap gap-2">
-                {product.colors.map((c) => (
+            <div className="mb-7">
+              <h3 className="mb-3 font-semibold text-[#292521]">
+                Available Colors
+              </h3>
+
+              <div className="flex flex-wrap gap-3">
+                {product.colors.map((color) => (
                   <button
-                    key={c}
-                    onClick={() => setColor(c)}
-                    className={`font-(family-name:--font-lato) rounded-full border px-4 py-2 text-sm transition-colors ${
-                      color === c
-                        ? "border-[#292521] bg-[#292521] text-white"
-                        : "border-[#292521]/30 text-[#292521] hover:border-[#292521]"
+                    key={color}
+                    onClick={() => setSelectedColor(color)}
+                    className={`rounded-lg border px-4 py-2 text-sm transition ${
+                      selectedColor === color
+                        ? "border-[#B58A62] bg-[#B58A62]/10 text-[#292521]"
+                        : "border-[#D9D0C5] text-[#77716A]"
                     }`}
                   >
-                    {c}
+                    {color}
                   </button>
                 ))}
               </div>
             </div>
           )}
 
-          {/* Quantity + stock */}
-          <div className="mt-6 flex items-center gap-5">
-            <div className="flex items-center gap-1 rounded-full border border-[#292521]/30 p-1">
-              <button
-                onClick={() => setQty(Math.max(1, qty - 1))}
-                disabled={qty <= 1}
-                aria-label="Decrease"
-                className="flex h-9 w-9 items-center justify-center rounded-full text-[#292521] transition-colors hover:bg-[#EEF3F5] disabled:opacity-30"
-              >
-                <FiMinus size={16} />
-              </button>
-              <span className="font-(family-name:--font-lato) w-8 text-center text-sm font-medium tabular-nums">
-                {qty}
-              </span>
-              <button
-                onClick={() => setQty(Math.min(product.stock, qty + 1))}
-                disabled={qty >= product.stock}
-                aria-label="Increase"
-                className="flex h-9 w-9 items-center justify-center rounded-full text-[#292521] transition-colors hover:bg-[#EEF3F5] disabled:opacity-30"
-              >
-                <FiPlus size={16} />
-              </button>
-            </div>
-
-            <p
-              className={`font-(family-name:--font-lato) flex items-center gap-2 text-sm ${
-                inStock ? "text-[#292521]/70" : "text-red-500"
-              }`}
-            >
-              <span
-                className={`h-2 w-2 rounded-full ${
-                  inStock ? "bg-green-500" : "bg-red-500"
-                }`}
-              />
-              {inStock ? `${product.stock} in stock` : "Out of stock"}
-            </p>
-          </div>
+          {/* Stock */}
+          <p
+            className={`mb-7 text-sm ${
+              product.stock > 0 ? "text-green-700" : "text-red-500"
+            }`}
+          >
+            {product.stock > 0
+              ? `${product.stock} items available`
+              : "Out of stock"}
+          </p>
 
           {/* Add to cart */}
           <button
-            disabled={!inStock}
-            className="group mt-8 inline-flex w-full items-center justify-between rounded-full bg-[#292521] py-2 pl-7 pr-2 text-base font-medium text-white transition-colors hover:bg-black disabled:cursor-not-allowed disabled:opacity-40 sm:w-auto sm:min-w-80"
+            type="button"
+            disabled={
+              product.stock <= 0 ||
+              (product.sizes?.length > 0 && !selectedSize) ||
+              (product.colors?.length > 0 && !selectedColor)
+            }
+            className="flex w-full items-center justify-center gap-3 rounded-xl bg-[#292521] px-6 py-4 font-medium text-white transition hover:bg-[#B58A62] disabled:cursor-not-allowed disabled:opacity-40"
           >
-            {inStock ? "Add to cart" : "Out of stock"}
-            <span className="flex h-11 w-11 items-center justify-center rounded-full bg-orange-500 transition-transform group-hover:rotate-45 group-disabled:rotate-0">
-              <FiArrowUpRight size={20} />
-            </span>
+            <FiShoppingBag size={20} />
+            Add to Cart
           </button>
 
-          {/* Perks */}
-          <div className="font-(family-name:--font-lato) mt-8 grid gap-3 text-sm text-[#292521]/70 sm:grid-cols-2">
-            <p className="flex items-center gap-3">
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-sky-100 text-sky-700">
-                <FiTruck size={16} />
-              </span>
-              Free delivery over $50
-            </p>
-            <p className="flex items-center gap-3">
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-sky-100 text-sky-700">
-                <FiRefreshCcw size={16} />
-              </span>
-              30 days easy returns
-            </p>
-          </div>
-
-          {/* Admin */}
+          {/* Admin controls */}
           {isAdmin && (
-            <div className="mt-10 rounded-2xl border border-dashed border-[#292521]/25 bg-[#EEF3F5] p-4">
-              <p className="font-(family-name:--font-lato) text-xs text-[#292521]/60">
-                Admin controls
-              </p>
-              <div className="mt-3 flex flex-wrap gap-3">
-                <button
-                  onClick={() => router.push(`/admin/edit-product/${id}`)}
-                  className="font-(family-name:--font-lato) inline-flex items-center gap-2 rounded-full border border-[#292521] px-5 py-2 text-sm font-medium text-[#292521] transition-colors hover:bg-[#292521] hover:text-white"
-                >
-                  <FiEdit2 size={15} />
-                  Edit product
-                </button>
+            <div className="mt-5 flex gap-3">
+              <button
+                onClick={() =>
+                  router.push(`/admin/products/edit/${product._id}`)
+                }
+                className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-[#D9D0C5] py-3 text-[#292521] transition hover:bg-white"
+              >
+                <FiEdit />
+                Edit Product
+              </button>
 
-                <button
-                  onClick={handleDelete}
-                  disabled={deleting}
-                  className="font-(family-name:--font-lato) inline-flex items-center gap-2 rounded-full border border-red-500 px-5 py-2 text-sm font-medium text-red-500 transition-colors hover:bg-red-500 hover:text-white disabled:opacity-50"
-                >
-                  <FiTrash2 size={15} />
-                  {deleting ? "Deleting..." : "Delete product"}
-                </button>
-              </div>
+              <button
+                onClick={handleDelete}
+                className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-red-200 py-3 text-red-500 transition hover:bg-red-50"
+              >
+                <FiTrash2 />
+                Delete
+              </button>
             </div>
           )}
         </div>
-      </div>
-    </div>
-  );
-};
+      </section>
 
-const ProductDetailsPage = () => {
+      {/* Fullscreen lightbox */}
+      {isImageOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 p-4"
+          onClick={() => setIsImageOpen(false)}
+        >
+          <button
+            type="button"
+            onClick={() => setIsImageOpen(false)}
+            aria-label="Close image"
+            className="absolute right-5 top-5 z-50 rounded-full bg-white/10 p-3 text-white transition hover:bg-white/20"
+          >
+            <FiX size={25} />
+          </button>
+
+          <button
+            type="button"
+            onClick={(event) => {
+              event.stopPropagation();
+              previousImage();
+            }}
+            aria-label="Previous image"
+            className="absolute left-3 z-50 rounded-full bg-white/15 p-3 text-white transition hover:bg-white/30 md:left-8"
+          >
+            <FiArrowLeft size={25} />
+          </button>
+
+          <div
+            className="relative h-[80vh] w-full max-w-5xl"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <Image
+              src={allImages[activeImageIndex].url}
+              alt={product.name}
+              fill
+              sizes="90vw"
+              className="object-contain"
+            />
+          </div>
+
+          <button
+            type="button"
+            onClick={(event) => {
+              event.stopPropagation();
+              nextImage();
+            }}
+            aria-label="Next image"
+            className="absolute right-3 z-50 rounded-full bg-white/15 p-3 text-white transition hover:bg-white/30 md:right-8"
+          >
+            <FiArrowRight size={25} />
+          </button>
+
+          <p className="absolute bottom-5 text-sm text-white">
+            {activeImageIndex + 1} / {allImages.length}
+          </p>
+        </div>
+      )}
+    </main>
+  );
+}
+
+export default function Page() {
   return (
-    <Suspense fallback={<Skeleton />}>
-      <ProductDetailsContent />
+    <Suspense fallback={<p>Loading...</p>}>
+      <ProductDetailsPage />
     </Suspense>
   );
-};
-
-export default ProductDetailsPage;
+}
