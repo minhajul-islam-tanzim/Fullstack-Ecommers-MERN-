@@ -64,20 +64,19 @@ export const deleteProduct = async (id: string) => {
   return data;
 };
 
+
 export const updateProduct = async (id: string, formData: FormData) => {
-    const res = await fetch(`${API_URL}/products/${id}`,{
-        method: "PUT",
-        credentials: "include",
-        body: formData,
-    })
+    try{
+        const res = await axios.put(`${API_URL}/products/${id}`,
+            formData,
+            {withCredentials: true}
+        )
 
-    const data = await res.json();
-
-      if (!res.ok) {
-    throw new Error(data.message || "Product update failed");
-
-}
-
-return data;
+        return res.data;
+    }catch(error: any){
+        throw new Error(
+            error.response?.data?.message || "product update Faield "
+        )
+    }
 
 }

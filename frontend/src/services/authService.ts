@@ -37,9 +37,13 @@ export const loginUser = async (email: string, password: string) => {
 };
 
 export const getMe = async () => {
+
   const response = await fetch(`${BASE_URL}/me`, { credentials: "include" })
+
   const data = await response.json();
+
    if (!response.ok) throw new Error(data.message);
+   
   return data;
 }
 

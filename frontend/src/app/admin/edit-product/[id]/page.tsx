@@ -1,83 +1,78 @@
+
 "use client";
 
-import { Suspense, useEffect, useState, FormEvent, ChangeEvent } from "react";import { useParams, useRouter } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+import type { FormEvent, ChangeEvent } from "react";
+import { useParams, useRouter } from "next/navigation";
+import Image from "next/image";
 import { getProductById, updateProduct } from "@/services/productService";
 
-const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
+interface ProductImage {
+  url: string;
+  public_id: string;
+}
+
+interface Product {
+  _id: string;
+  name: string;
+  gender: string;
+  description: string;
+  price: number;
+  category: string;
+  mainImage: ProductImage;
+  additionalImages: ProductImage[];
+  sizes: string[];
+  colors: string[];
+  stock: number;
+}
+
 const SIZE_PRESETS = ["XS", "S", "M", "L", "XL", "XXL"];
 const GENDERS = ["Men", "Women", "Kids"];
 const CATEGORIES = ["T-shirt", "Shirt", "Pant", "Shoes", "Top"];
-const COLOR_PRESETS = [
-  { name: "White", hex: "#FFFFFF" },
-  { name: "Red", hex: "#DC2626" },
-  { name: "Blue", hex: "#2563EB" },
-  { name: "Black", hex: "#171717" },
-  { name: "Yellow", hex: "#FACC15" },
-  { name: "Green", hex: "#16A34A" },
-];
-const colorHex = (n: string) => COLOR_PRESETS.find((c) => c.name === n)?.hex ?? "#999";
+const COLOR_PRESETS = ["White", "Red", "Blue", "Black", "Yellow", "Green"];
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 
-/* ---------- small reusable piece ---------- */
-
-function Field({
-  label,
-  htmlFor,
-  hint,
-  children,
-}: {
-  label: string;
-  htmlFor?: string;
-  hint?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div>
-      <label htmlFor={htmlFor} className="mb-1.5 block text-sm font-medium text-neutral-800">
-        {label}
-      </label>
-      {children}
-      {hint && <p className="mt-1.5 text-xs text-neutral-500">{hint}</p>}
-    </div>
-  );
-}
-
-/* ---------- page ---------- */
-
-const EditProductForm = () => {
+function EditProductForm() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
 
-  const [product, setProduct] = useState<any>(null);
+  const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
+  const [error, setError] = useState("");
   const [message, setMessage] = useState("");
-  const [isError, setIsError] = useState(false);
-  const [imageError, setImageError] = useState("");
-  const [preview, setPreview] = useState<string | null>(null); // new image only
 
-  // form state (also drives the live preview card)
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
   const [category, setCategory] = useState("");
   const [gender, setGender] = useState("");
+  const [description, setDescription] = useState("");
+  const [stock, setStock] = useState("");
   const [sizes, setSizes] = useState<string[]>([]);
   const [colors, setColors] = useState<string[]>([]);
 
-  // Fetch product and fill the form
+  const [mainImage, setMainImage] = useState<File | null>(null);
+  const [mainPreview, setMainPreview] = useState("");
+  const [additionalImages, setAdditionalImages] = useState<File[]>([]);
+  const [additionalPreviews, setAdditionalPreviews] = useState<string[]>([]);
+
+  // Fetch product
   useEffect(() => {
     const fetchProduct = async () => {
       try {
         const data = await getProductById(id);
+
         setProduct(data);
-        setName(data.name ?? "");
+        setName(data.name || "");
         setPrice(String(data.price ?? ""));
-        setCategory(data.category ?? "");
-        setGender(data.gender ?? "");
-        setSizes(Array.isArray(data.sizes) ? data.sizes : []);
-        setColors(Array.isArray(data.colors) ? data.colors : []);
-      } catch (error) {
-        setIsError(true);
-        setMessage(error instanceof Error ? error.message : "Product not found");
+        setCategory(data.category || "");
+        setGender(data.gender || "");
+        setDescription(data.description || "");
+        setStock(String(data.stock ?? 0));
+        setSizes(data.sizes || []);
+        setColors(data.colors || []);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Product not found");
       } finally {
         setLoading(false);
       }
@@ -86,434 +81,368 @@ const EditProductForm = () => {
     fetchProduct();
   }, [id]);
 
-  useEffect(() => {
-    return () => {
-      if (preview) URL.revokeObjectURL(preview);
-    };
-  }, [preview]);
-
-  const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
+  // Main image change
+  const handleMainImage = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    if (!file) return;
 
-    if (file && file.size > MAX_IMAGE_SIZE) {
-      setImageError("Image must be 5 MB or smaller");
-      setPreview(null);
+    if (file.size > MAX_IMAGE_SIZE) {
+      setError("Main image must be 5 MB or smaller");
       e.target.value = "";
       return;
     }
 
-    setImageError("");
-    setPreview(file ? URL.createObjectURL(file) : null);
+    setError("");
+    setMainImage(file);
+    setMainPreview(URL.createObjectURL(file));
   };
 
-  const toggleSize = (s: string) =>
-    setSizes((prev) => (prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s]));
+  // Additional images change
+  const handleAdditionalImages = (e: ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
 
-  const toggleColor = (c: string) =>
-    setColors((prev) => (prev.includes(c) ? prev.filter((x) => x !== c) : [...prev, c]));
+    if (files.length > 3) {
+      setError("Maximum 3 additional images allowed");
+      e.target.value = "";
+      return;
+    }
+
+    if (files.some((file) => file.size > MAX_IMAGE_SIZE)) {
+      setError("Each image must be 5 MB or smaller");
+      e.target.value = "";
+      return;
+    }
+
+    setError("");
+    setAdditionalImages(files);
+    setAdditionalPreviews(
+      files.map((file) => URL.createObjectURL(file))
+    );
+  };
+
+  const toggleSize = (size: string) => {
+    setSizes((prev) =>
+      prev.includes(size)
+        ? prev.filter((item) => item !== size)
+        : [...prev, size]
+    );
+  };
+
+  const toggleColor = (color: string) => {
+    setColors((prev) =>
+      prev.includes(color)
+        ? prev.filter((item) => item !== color)
+        : [...prev, color]
+    );
+  };
 
   // Update product
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const form = e.currentTarget;
-    const formData = new FormData(form);
+    if (!product) return;
+
+    const formData = new FormData();
+
+    formData.append("name", name);
+    formData.append("price", price);
+    formData.append("category", category);
+    formData.append("gender", gender);
+    formData.append("description", description);
+    formData.append("stock", stock);
+    formData.append("sizes", sizes.join(","));
+    formData.append("colors", colors.join(","));
+
+    if (mainImage) {
+      formData.append("mainImage", mainImage);
+    }
+
+    additionalImages.forEach((file) => {
+      formData.append("additionalImages", file);
+    });
 
     try {
       setUpdating(true);
+      setError("");
       setMessage("");
-      setIsError(false);
 
       await updateProduct(id, formData);
 
       setMessage("Product updated successfully!");
       router.push("/admin/products");
-    } catch (error) {
-      setIsError(true);
-      setMessage(error instanceof Error ? error.message : "Product update failed");
+      router.refresh();
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Product update failed"
+      );
     } finally {
       setUpdating(false);
-      router.push("/")
     }
   };
 
-  const inputClass =
-    "w-full rounded-lg border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-900 placeholder:text-neutral-400 outline-none transition focus:border-indigo-600 focus:ring-4 focus:ring-indigo-600/15";
-
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-neutral-100">
-        <p className="text-sm text-neutral-500">Loading product...</p>
+      <div className="flex min-h-screen items-center justify-center bg-[#F5F0E8]">
+        Loading product...
       </div>
     );
   }
 
   if (!product) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-neutral-100">
-        <p className="text-sm text-neutral-600">{message || "Product not found."}</p>
-        <button
-          type="button"
-          onClick={() => router.push("/admin/products")}
-          className="rounded-lg border border-neutral-300 bg-white px-5 py-2.5 text-sm font-semibold text-neutral-700 hover:bg-neutral-50"
-        >
-          Back to products
-        </button>
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-[#F5F0E8]">
+        <p>{error || "Product not found"}</p>
+        <button onClick={() => router.back()}>Go Back</button>
       </div>
     );
   }
 
-  // keep old values that are not in the presets, so they are not lost
-  const categoryOptions = category && !CATEGORIES.includes(category) ? [...CATEGORIES, category] : CATEGORIES;
-  const sizeOptions = [...SIZE_PRESETS, ...sizes.filter((s) => !SIZE_PRESETS.includes(s))];
-  const colorOptions = [
-    ...COLOR_PRESETS,
-    ...colors
-      .filter((c) => !COLOR_PRESETS.some((p) => p.name === c))
-      .map((c) => ({ name: c, hex: "#999" })),
-  ];
-
-  const shownImage = preview ?? product.image;
+  const shownImage = mainPreview || product.mainImage?.url;
 
   return (
-    <div className="min-h-screen bg-neutral-100">
-      {/* top bar */}
-      <header className="border-b border-neutral-200 bg-white">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
+    <main className="min-h-screen bg-[#F5F0E8] px-4 py-8 md:px-10">
+      <div className="mx-auto max-w-6xl">
+        <div className="mb-8 flex items-center justify-between">
           <div>
-            <h1 className="font-serif text-2xl font-semibold text-neutral-900">Edit product</h1>
-            <p className="text-sm text-neutral-500">
-              The card on the left shows how it will look in your store.
+            <h1 className="text-3xl font-semibold text-[#292521]">
+              Edit Product
+            </h1>
+            <p className="text-sm text-[#77716A]">
+              Update your product information
             </p>
           </div>
+
           <button
             type="button"
             onClick={() => router.push("/admin/products")}
-            className="hidden rounded-lg px-4 py-2 text-sm font-medium text-neutral-600 hover:bg-neutral-100 sm:block"
+            className="rounded-lg border px-4 py-2"
           >
-            Back to products
+            Back
           </button>
         </div>
-      </header>
 
-      <form
-        onSubmit={handleSubmit}
-        className="mx-auto grid max-w-6xl gap-8 px-4 py-8 lg:grid-cols-[380px_1fr]"
-      >
-        {/* ===== LEFT: live product card ===== */}
-        <aside className="lg:sticky lg:top-8 lg:self-start">
-          <div className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-neutral-200">
-            <label
-              htmlFor="image"
-              className={`group relative flex aspect-[4/5] cursor-pointer items-center justify-center overflow-hidden ${
-                imageError ? "bg-red-50" : "bg-neutral-200"
-              }`}
-            >
-              {shownImage ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={shownImage} alt={name || "Product"} className="h-full w-full object-cover" />
-              ) : (
-                <div className="px-8 text-center">
-                  <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-white text-2xl text-neutral-500 shadow-sm">
-                    +
-                  </div>
-                  <p className="text-sm font-semibold text-neutral-800">Upload product photo</p>
-                  <p className="mt-1 text-xs text-neutral-500">Up to 5 MB.</p>
-                </div>
+        <form onSubmit={handleSubmit} className="grid gap-8 lg:grid-cols-2">
+
+          {/* Image section */}
+          <section className="rounded-2xl bg-white p-6 shadow-sm">
+            <h2 className="mb-4 text-lg font-semibold">Product Images</h2>
+
+            <div className="relative aspect-[4/5] overflow-hidden rounded-xl bg-neutral-100">
+              {shownImage && (
+                <Image
+                  src={shownImage}
+                  alt={name}
+                  fill
+                  unoptimized={mainPreview !== ""}
+                  className="object-cover"
+                />
               )}
+            </div>
 
-              {gender && (
-                <span className="absolute left-3 top-3 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-neutral-800 backdrop-blur">
-                  {gender}
-                </span>
-              )}
-
-              {preview && (
-                <span className="absolute right-3 top-3 rounded-full bg-indigo-600 px-3 py-1 text-xs font-semibold text-white">
-                  New photo
-                </span>
-              )}
-
-              <span className="absolute bottom-3 left-1/2 -translate-x-1/2 rounded-full bg-neutral-900/80 px-4 py-1.5 text-xs font-medium text-white opacity-0 transition group-hover:opacity-100">
-                Change photo
-              </span>
+            <label className="mt-4 block text-sm font-medium">
+              Main Image
             </label>
 
             <input
-              id="image"
-              name="image"
               type="file"
               accept="image/*"
-              onChange={handleImageChange}
-              className="sr-only"
+              onChange={handleMainImage}
+              className="mt-2 w-full text-sm"
             />
 
-            <div className="space-y-3 p-5">
-              {imageError && <p className="text-xs font-medium text-red-600">{imageError}</p>}
+            <p className="mt-4 text-sm font-medium">
+              Additional Images (Maximum 3)
+            </p>
 
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <p className="text-xs text-neutral-500">{category || "Category"}</p>
-                  <h2
-                    className={`truncate font-serif text-xl ${
-                      name ? "text-neutral-900" : "text-neutral-300"
-                    }`}
-                  >
-                    {name || "Product name"}
-                  </h2>
-                </div>
-                <p className="shrink-0 text-lg font-semibold text-neutral-900">
-                  {price ? `৳${Number(price).toLocaleString()}` : "৳0"}
-                </p>
-              </div>
-
-              {sizes.length > 0 && (
-                <div className="flex flex-wrap gap-1.5">
-                  {sizes.map((s) => (
-                    <span
-                      key={s}
-                      className="rounded border border-neutral-300 px-2 py-0.5 text-xs text-neutral-700"
-                    >
-                      {s}
-                    </span>
-                  ))}
-                </div>
-              )}
-
-              {colors.length > 0 && (
-                <div className="flex gap-1.5">
-                  {colors.map((c) => (
-                    <span
-                      key={c}
-                      title={c}
-                      className="h-4 w-4 rounded-full border border-black/20"
-                      style={{ backgroundColor: colorHex(c) }}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        </aside>
-
-        {/* ===== RIGHT: form ===== */}
-        <div className="space-y-6">
-          {/* Details */}
-          <section className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-neutral-200 sm:p-8">
-            <h2 className="mb-6 text-lg font-semibold text-neutral-900">Product details</h2>
-
-            <div className="space-y-6">
-              <Field label="Product name" htmlFor="name">
-                <input
-                  id="name"
-                  name="name"
-                  type="text"
-                  required
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="e.g. Oversized cotton shirt"
-                  className={inputClass}
-                />
-              </Field>
-
-              <Field label="Who is it for?">
-                <div className="grid grid-cols-3 gap-2">
-                  {GENDERS.map((g, i) => (
-                    <label key={g} className="cursor-pointer">
-                      <input
-                        type="radio"
-                        name="gender"
-                        value={g}
-                        required={i === 0}
-                        checked={gender === g}
-                        onChange={() => setGender(g)}
-                        className="peer sr-only"
-                      />
-                      <span className="block rounded-lg border border-neutral-300 py-3 text-center text-sm font-medium text-neutral-700 transition peer-checked:border-indigo-600 peer-checked:bg-indigo-600 peer-checked:text-white peer-focus-visible:ring-4 peer-focus-visible:ring-indigo-600/25">
-                        {g}
-                      </span>
-                    </label>
-                  ))}
-                </div>
-              </Field>
-
-              <Field label="Category">
-                <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
-                  {categoryOptions.map((c, i) => (
-                    <label key={c} className="cursor-pointer">
-                      <input
-                        type="radio"
-                        name="category"
-                        value={c}
-                        required={i === 0}
-                        checked={category === c}
-                        onChange={() => setCategory(c)}
-                        className="peer sr-only"
-                      />
-                      <span className="block rounded-lg border border-neutral-300 py-3 text-center text-sm font-medium text-neutral-700 transition peer-checked:border-indigo-600 peer-checked:bg-indigo-600 peer-checked:text-white peer-focus-visible:ring-4 peer-focus-visible:ring-indigo-600/25">
-                        {c}
-                      </span>
-                    </label>
-                  ))}
-                </div>
-              </Field>
-
-              <Field label="Description" htmlFor="description">
-                <textarea
-                  id="description"
-                  name="description"
-                  rows={4}
-                  defaultValue={product.description}
-                  placeholder="Fabric, fit, care instructions..."
-                  className={`${inputClass} resize-none`}
-                />
-              </Field>
-            </div>
-          </section>
-
-          {/* Price & stock */}
-          <section className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-neutral-200 sm:p-8">
-            <h2 className="mb-6 text-lg font-semibold text-neutral-900">Price and stock</h2>
-
-            <div className="grid gap-6 sm:grid-cols-2">
-              <Field label="Price" htmlFor="price">
-                <div className="relative">
-                  <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-sm text-neutral-400">
-                    ৳
-                  </span>
-                  <input
-                    id="price"
-                    name="price"
-                    type="number"
-                    min="0"
-                    required
-                    value={price}
-                    onChange={(e) => setPrice(e.target.value)}
-                    placeholder="0"
-                    className={`${inputClass} pl-9`}
+            <div className="mt-3 flex flex-wrap gap-3">
+              {product.additionalImages?.map((image) => (
+                <div key={image.public_id} className="relative h-20 w-20">
+                  <Image
+                    src={image.url}
+                    alt={name}
+                    fill
+                    className="rounded-lg object-cover"
                   />
                 </div>
-              </Field>
+              ))}
 
-              <Field label="Items in stock" htmlFor="stock">
-                <input
-                  id="stock"
-                  name="stock"
-                  type="number"
-                  min="0"
-                  defaultValue={product.stock}
-                  required
-                  className={inputClass}
-                />
-              </Field>
-            </div>
-          </section>
-
-          {/* Variants */}
-          <section className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-neutral-200 sm:p-8">
-            <h2 className="mb-6 text-lg font-semibold text-neutral-900">Sizes and colors</h2>
-
-            <div className="space-y-6">
-              <Field label="Available sizes" hint="Tap to select. You can pick more than one.">
-                <input type="hidden" name="sizes" value={sizes.join(", ")} />
-                <div className="flex flex-wrap gap-2">
-                  {sizeOptions.map((s) => {
-                    const on = sizes.includes(s);
-                    return (
-                      <button
-                        key={s}
-                        type="button"
-                        aria-pressed={on}
-                        onClick={() => toggleSize(s)}
-                        className={`h-11 min-w-[3.25rem] rounded-lg border px-3 text-sm font-medium transition ${
-                          on
-                            ? "border-indigo-600 bg-indigo-600 text-white"
-                            : "border-neutral-300 text-neutral-700 hover:border-neutral-500"
-                        }`}
-                      >
-                        {s}
-                      </button>
-                    );
-                  })}
+              {additionalPreviews.map((src, index) => (
+                <div key={index} className="relative h-20 w-20">
+                  <Image
+                    src={src}
+                    alt={`New image ${index + 1}`}
+                    fill
+                    unoptimized
+                    className="rounded-lg object-cover"
+                  />
                 </div>
-              </Field>
-
-              <Field label="Available colors" hint="Tap to select. You can pick more than one.">
-                <input type="hidden" name="colors" value={colors.join(", ")} />
-                <div className="flex flex-wrap gap-2">
-                  {colorOptions.map((c) => {
-                    const on = colors.includes(c.name);
-                    return (
-                      <button
-                        key={c.name}
-                        type="button"
-                        aria-pressed={on}
-                        onClick={() => toggleColor(c.name)}
-                        className={`flex h-11 items-center gap-2 rounded-lg border px-3 text-sm font-medium transition ${
-                          on
-                            ? "border-indigo-600 bg-indigo-600 text-white"
-                            : "border-neutral-300 text-neutral-700 hover:border-neutral-500"
-                        }`}
-                      >
-                        <span
-                          className="h-4 w-4 rounded-full border border-black/20"
-                          style={{ backgroundColor: c.hex }}
-                        />
-                        {c.name}
-                      </button>
-                    );
-                  })}
-                </div>
-              </Field>
+              ))}
             </div>
-          </section>
 
-          {message && (
-            <p
-              role="status"
-              className={`rounded-xl px-4 py-3 text-sm font-medium ${
-                isError ? "bg-red-50 text-red-700" : "bg-emerald-50 text-emerald-800"
-              }`}
-            >
-              {message}
+            <input
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={handleAdditionalImages}
+              className="mt-3 w-full text-sm"
+            />
+
+            <p className="mt-2 text-xs text-neutral-500">
+              Selecting new additional images replaces the existing set.
+              Leave empty to keep existing images.
             </p>
-          )}
+          </section>
 
-          <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-            <button
-              type="button"
-              onClick={() => router.push("/admin/products")}
-              className="rounded-lg border border-neutral-300 bg-white px-6 py-3 text-sm font-semibold text-neutral-700 hover:bg-neutral-50"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={updating || !!imageError}
-              className="rounded-lg bg-indigo-600 px-8 py-3 text-sm font-semibold text-white transition hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-600/30 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {updating ? "Updating..." : "Update product"}
-            </button>
-          </div>
-        </div>
-      </form>
-    </div>
-  );
-};
+          {/* Details section */}
+          <section className="space-y-5 rounded-2xl bg-white p-6 shadow-sm">
+            <h2 className="text-lg font-semibold">Product Details</h2>
 
-// export default EditProductForm;
+            <div>
+              <label className="mb-2 block text-sm font-medium">
+                Product Name
+              </label>
+              <input
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                className="w-full rounded-lg border p-3"
+              />
+            </div>
 
+            <div>
+              <label className="mb-2 block text-sm font-medium">Price</label>
+              <input
+                type="number"
+                min="0"
+                value={price}
+                onChange={(e) => setPrice(e.target.value)}
+                required
+                className="w-full rounded-lg border p-3"
+              />
+            </div>
 
-const EditProductPage = () => (
-  <Suspense
-    fallback={
-      <div className="flex min-h-screen items-center justify-center bg-neutral-100">
-        <p className="text-sm text-neutral-500">Loading product...</p>
+            <div>
+              <label className="mb-2 block text-sm font-medium">Gender</label>
+              <select
+                value={gender}
+                onChange={(e) => setGender(e.target.value)}
+                className="w-full rounded-lg border p-3"
+              >
+                {GENDERS.map((item) => (
+                  <option key={item} value={item}>{item}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="mb-2 block text-sm font-medium">Category</label>
+              <select
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                className="w-full rounded-lg border p-3"
+              >
+                {[...new Set([...CATEGORIES, category])].map((item) => (
+                  <option key={item} value={item}>{item}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="mb-2 block text-sm font-medium">
+                Description
+              </label>
+              <textarea
+                rows={4}
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                className="w-full rounded-lg border p-3"
+              />
+            </div>
+
+            <div>
+              <label className="mb-2 block text-sm font-medium">Stock</label>
+              <input
+                type="number"
+                min="0"
+                value={stock}
+                onChange={(e) => setStock(e.target.value)}
+                className="w-full rounded-lg border p-3"
+              />
+            </div>
+
+            {/* Sizes */}
+            <div>
+              <p className="mb-2 text-sm font-medium">Sizes</p>
+              <div className="flex flex-wrap gap-2">
+                {[...new Set([...SIZE_PRESETS, ...sizes])].map((size) => (
+                  <button
+                    key={size}
+                    type="button"
+                    onClick={() => toggleSize(size)}
+                    className={`rounded-lg border px-4 py-2 ${
+                      sizes.includes(size)
+                        ? "bg-[#292521] text-white"
+                        : "bg-white"
+                    }`}
+                  >
+                    {size}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Colors */}
+            <div>
+              <p className="mb-2 text-sm font-medium">Colors</p>
+              <div className="flex flex-wrap gap-2">
+                {[...new Set([...COLOR_PRESETS, ...colors])].map((color) => (
+                  <button
+                    key={color}
+                    type="button"
+                    onClick={() => toggleColor(color)}
+                    className={`rounded-lg border px-4 py-2 ${
+                      colors.includes(color)
+                        ? "bg-[#292521] text-white"
+                        : "bg-white"
+                    }`}
+                  >
+                    {color}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {error && <p className="text-sm text-red-600">{error}</p>}
+            {message && <p className="text-sm text-green-700">{message}</p>}
+
+            <div className="flex gap-3 pt-4">
+              <button
+                type="button"
+                onClick={() => router.back()}
+                className="flex-1 rounded-lg border px-5 py-3"
+              >
+                Cancel
+              </button>
+
+              <button
+                type="submit"
+                disabled={updating}
+                className="flex-1 rounded-lg bg-[#292521] px-5 py-3 text-white disabled:opacity-50"
+              >
+                {updating ? "Updating..." : "Update Product"}
+              </button>
+            </div>
+          </section>
+        </form>
       </div>
-    }
-  >
-    <EditProductForm />
-  </Suspense>
-);
+    </main>
+  );
+}
 
-export default EditProductPage;
+export default function EditProductPage() {
+  return (
+    <Suspense fallback={<p className="p-8 text-center">Loading...</p>}>
+      <EditProductForm />
+    </Suspense>
+  );
+}

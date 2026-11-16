@@ -3,7 +3,6 @@
 import { useEffect, useState, Suspense } from "react";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
-import axios from "axios";
 import {
   FiArrowLeft,
   FiArrowRight,
@@ -13,6 +12,10 @@ import {
   FiEdit,
   FiTrash2,
 } from "react-icons/fi";
+
+import { getProductById } from "@/services/productService";
+
+import { getMe } from "@/services/authService";
 
 interface ProductImage {
   url: string;
@@ -40,7 +43,9 @@ interface User {
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 function ProductDetailsPage() {
+
   const { id } = useParams<{ id: string }>();
+
   const router = useRouter();
 
   const [product, setProduct] = useState<Product | null>(null);
@@ -55,41 +60,31 @@ function ProductDetailsPage() {
   const [selectedColor, setSelectedColor] = useState("");
 
   // Fetch product and current user
-  useEffect(() => {
-    if (!id) return;
 
-    const fetchProduct = async () => {
+  useEffect(() => {
+    const fetchData = async () => {
       try {
         setLoading(true);
         setError("");
 
-        const productRequest = axios.get(`${API_URL}/products/${id}`);
-
-        const userRequest = axios
-          .get(`${API_URL}/auth/me`, { withCredentials: true })
-          .catch(() => null);
-
-        const [productResponse, userResponse] = await Promise.all([
-          productRequest,
-          userRequest,
+        const [productData, userData] = await Promise.all([
+          getProductById(id),
+          getMe().catch(() => null),
         ]);
 
-        setProduct(productResponse.data.product);
-        setActiveImageIndex(0);
 
-        if (userResponse) {
-          const user: User | undefined = userResponse.data.user;
-          setIsAdmin(user?.role === "admin");
-        }
-      } catch (err) {
-        console.error("Product fetch error:", err);
-        setError("Failed to load product.");
-      } finally {
-        setLoading(false);
+
+        setProduct(productData)
+ setIsAdmin(userData?.user?.role === "admin");
+        
+      } catch (error: any) {
+          setError(error.message || "Failed to fetch product");
+      }finally{
+        setLoading(false)
       }
     };
 
-    fetchProduct();
+    fetchData()
   }, [id]);
 
   if (loading) {
@@ -123,7 +118,7 @@ function ProductDetailsPage() {
 
   const previousImage = () => {
     setActiveImageIndex(
-      (current) => (current - 1 + allImages.length) % allImages.length
+      (current) => (current - 1 + allImages.length) % allImages.length,
     );
   };
 
@@ -132,23 +127,7 @@ function ProductDetailsPage() {
   };
 
   const handleDelete = async () => {
-    const confirmed = window.confirm(
-      "Are you sure you want to delete this product?"
-    );
-
-    if (!confirmed) return;
-
-    try {
-      await axios.delete(`${API_URL}/products/${product._id}`, {
-        withCredentials: true,
-      });
-
-      alert("Product deleted successfully!");
-      router.push("/");
-    } catch (err) {
-      console.error(err);
-      alert("Failed to delete product.");
-    }
+  
   };
 
   return (
@@ -240,9 +219,7 @@ function ProductDetailsPage() {
 
           <div className="mb-6 h-px bg-[#D9D0C5]" />
 
-          <p className="mb-8 leading-7 text-[#77716A]">
-            {product.description}
-          </p>
+          <p className="mb-8 leading-7 text-[#77716A]">{product.description}</p>
 
           {/* Sizes */}
           {product.sizes?.length > 0 && (
@@ -323,11 +300,12 @@ function ProductDetailsPage() {
           </button>
 
           {/* Admin controls */}
+
           {isAdmin && (
             <div className="mt-5 flex gap-3">
               <button
                 onClick={() =>
-                  router.push(`/admin/products/edit/${product._id}`)
+  router.push(`/admin/edit-product/${product._id}`)
                 }
                 className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-[#D9D0C5] py-3 text-[#292521] transition hover:bg-white"
               >
@@ -410,7 +388,7 @@ function ProductDetailsPage() {
 
 export default function Page() {
   return (
-    <Suspense fallback={<p>Loading...</p>}>
+    <Suspense fallback={<p className="text-red-600">Loading...</p>}>
       <ProductDetailsPage />
     </Suspense>
   );
