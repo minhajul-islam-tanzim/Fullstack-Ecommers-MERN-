@@ -224,17 +224,18 @@ function EditProductForm() {
             </div>
 
             <label className="mt-4 block text-sm font-medium">
-              Main Image
+              Change Profile Image 👇
             </label>
 
             <input
               type="file"
+    
               name="mainImage"
               accept="image/*"
               onChange={handleMainImage}
-              className="mt-2 w-full text-sm"
+              className="mt-2 w-full text-sm bg-gray-500 text-amber-50 hover:bg-gray-300 hover:text-black p-2 cursor-pointer"
             />
-
+            
             <p className="mt-4 text-sm font-medium">
               Additional Images (Maximum 3)
             </p>
@@ -264,13 +265,13 @@ function EditProductForm() {
               ))}
             </div>
 
-            <input
+            {/* <input
               type="file"
               accept="image/*"
               multiple
               onChange={handleAdditionalImages}
               className="mt-3 w-full text-sm"
-            />
+            /> */}
 
             <p className="mt-2 text-xs text-neutral-500">
               Selecting new additional images replaces the existing set.
