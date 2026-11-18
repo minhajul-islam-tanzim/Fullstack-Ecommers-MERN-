@@ -219,6 +219,15 @@ exports.deleteController = async (req, res) => {
         }
       }
 
+        await Product.findByIdAndDelete(id)
+
+        return res.status(200).json({
+          success: true,
+          message: " Product deleted successfuly "
+
+      })
+    
+
 
   }catch(error){
       res.status(500).json({
