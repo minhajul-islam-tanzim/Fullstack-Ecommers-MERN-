@@ -48,35 +48,36 @@ export const getProductById = async (id: string) => {
 
 }
 
-
-export const deleteProduct = async (id: string) => {
-  const res = await fetch(`${API_URL}/products/${id}`, {
-    method: "DELETE",
-    credentials: "include",
-  });
-
-  const data = await res.json();
-
-  if (!res.ok) {
-    throw new Error(data.message || "Product delete failed");
-  }
-
-  return data;
-};
-
-
 export const updateProduct = async (id: string, formData: FormData) => {
     try{
         const res = await axios.put(`${API_URL}/products/${id}`,
             formData,
             {withCredentials: true}
         )
-
+        
         return res.data;
     }catch(error: any){
         throw new Error(
             error.response?.data?.message || "product update Faield "
         )
     }
-
+    
+    
 }
+
+export const deleteProduct = async (id: string) => {
+        try{ 
+        const res = await axios.delete(`${API_URL}/products/${id}`,{
+            withCredentials: true,
+        })
+
+        return res.data; 
+
+
+
+        }catch(error: any){
+            throw new Error(
+                error.response?.data?.message || "Product Delete failed"
+            ) 
+        }
+    };
