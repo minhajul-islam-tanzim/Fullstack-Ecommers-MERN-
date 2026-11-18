@@ -73,8 +73,6 @@ export const deleteProduct = async (id: string) => {
 
         return res.data; 
 
-
-
         }catch(error: any){
             throw new Error(
                 error.response?.data?.message || "Product Delete failed"

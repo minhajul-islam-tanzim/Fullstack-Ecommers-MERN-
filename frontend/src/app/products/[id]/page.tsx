@@ -4,7 +4,7 @@
 import { useEffect, useState, Suspense } from "react";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
-import { getProductById } from "@/services/productService";
+import { deleteProduct, getProductById } from "@/services/productService";
 import { getMe } from "@/services/authService";
 
 interface ProductImage {
@@ -39,6 +39,28 @@ function ProductDetailsPage() {
   const [activeImage, setActiveImage] = useState(0);
   const [selectedSize, setSelectedSize] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
+
+
+  const handleDelete = async () => { 
+    try{ 
+      const confirmDelete = window.confirm(
+        " are ypu sure "
+      )
+
+      if(!confirmDelete){ 
+        return 
+      }
+
+      await deleteProduct(id);
+      router.push("/")
+      router.refresh()
+
+    }catch(error: any) { 
+      alert(error.message)
+
+    }
+
+  }
   
   // Fetch product
   useEffect(() => {
@@ -226,14 +248,24 @@ function ProductDetailsPage() {
 
             {/* Admin Edit Button */}
             {isAdmin && (
+              <div>
               <button
                 onClick={() =>
                   router.push(`/admin/edit-product/${product._id}`)
                 }
                 className="mt-4 rounded-xl border border-[#292521] px-6 py-3 hover:cursor-pointer hover:bg-gray-300"
-              >
+                >
                 Edit Product
+              </button >
+
+              <button
+              onClick={handleDelete}
+                className="mt-4 rounded-xl border border-[#292521] px-6 py-3 hover:cursor-pointer hover:bg-gray-300"
+              >
+                 Delete Product
               </button>
+
+                </div>
             )}
 
           </div>
