@@ -148,14 +148,13 @@ console.log("NEW IMAGE:", req.files?.mainImage?.[0]);
     product.price = price ?? product.price;
     product.stock = stock ?? product.stock;
 
-    product.sizes = sizes
-      ? sizes.split(",").map((size) => size.trim()).filter(Boolean)
-      : product.sizes;
+  product.sizes = sizes
+  ? JSON.parse(sizes)
+  : product.sizes;
 
-    product.colors = colors
-      ? colors.split(",").map((color) => color.trim()).filter(Boolean)
-      : product.colors;
-
+product.colors = colors
+  ? JSON.parse(colors)
+  : product.colors;
     // Update image if a new image is uploaded
 
     if (req.files?.mainImage?.[0]) {
@@ -175,6 +174,7 @@ console.log("NEW IMAGE:", req.files?.mainImage?.[0]);
 
 
     await product.save();
+    
     console.log("SAVED PRODUCT:", product.mainImage);
 
     return res.status(200).json({
@@ -182,6 +182,7 @@ console.log("NEW IMAGE:", req.files?.mainImage?.[0]);
       message: "Product updated successfully",
       product,
     });
+
 } catch(error){
   res.status(500).json({
       success: false,

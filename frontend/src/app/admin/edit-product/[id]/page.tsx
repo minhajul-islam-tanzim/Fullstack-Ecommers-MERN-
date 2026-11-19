@@ -142,6 +142,10 @@ function EditProductForm() {
   if (!product) return;
 
   const formData = new FormData(e.currentTarget);
+    formData.append("sizes", JSON.stringify(sizes))
+      formData.append("colors", JSON.stringify(colors));
+
+
 
   try {
     setUpdating(true);
@@ -265,17 +269,9 @@ function EditProductForm() {
               ))}
             </div>
 
-            {/* <input
-              type="file"
-              accept="image/*"
-              multiple
-              onChange={handleAdditionalImages}
-              className="mt-3 w-full text-sm"
-            /> */}
 
             <p className="mt-2 text-xs text-neutral-500">
-              Selecting new additional images replaces the existing set.
-              Leave empty to keep existing images.
+            You cant change additional image 
             </p>
           </section>
 
@@ -288,6 +284,7 @@ function EditProductForm() {
                 Product Name
               </label>
               <input
+              name="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
@@ -298,6 +295,7 @@ function EditProductForm() {
             <div>
               <label className="mb-2 block text-sm font-medium">Price</label>
               <input
+              name="price"
                 type="number"
                 min="0"
                 value={price}
@@ -310,6 +308,7 @@ function EditProductForm() {
             <div>
               <label className="mb-2 block text-sm font-medium">Gender</label>
               <select
+              name="gender"
                 value={gender}
                 onChange={(e) => setGender(e.target.value)}
                 className="w-full rounded-lg border p-3"
@@ -323,6 +322,7 @@ function EditProductForm() {
             <div>
               <label className="mb-2 block text-sm font-medium">Category</label>
               <select
+              name="category"
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
                 className="w-full rounded-lg border p-3"
@@ -338,6 +338,7 @@ function EditProductForm() {
                 Description
               </label>
               <textarea
+              name="description"
                 rows={4}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
@@ -348,6 +349,7 @@ function EditProductForm() {
             <div>
               <label className="mb-2 block text-sm font-medium">Stock</label>
               <input
+                name="stock"
                 type="number"
                 min="0"
                 value={stock}

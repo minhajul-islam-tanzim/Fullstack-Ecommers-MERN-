@@ -61,8 +61,7 @@ export const updateProduct = async (id: string, formData: FormData) => {
             error.response?.data?.message || "product update Faield "
         )
     }
-    
-    
+
 }
 
 export const deleteProduct = async (id: string) => {
