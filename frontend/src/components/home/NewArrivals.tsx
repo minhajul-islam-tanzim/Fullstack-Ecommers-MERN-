@@ -6,11 +6,16 @@ import { FiArrowLeft, FiArrowRight, FiArrowUpRight } from "react-icons/fi";
 import { FaHeart, FaRegHeart } from "react-icons/fa6";
 import { getAllProducts } from "@/services/productService";
 
+import Image from "next/image";
+
 interface Product {
   _id: string;
   name: string;
   price: number;
-  image: string;
+    mainImage: {
+    url: string;
+    public_id: string
+  };
 }
 
 const pad = (n: number) => String(n).padStart(2, "0");
@@ -141,9 +146,10 @@ const NewArrivals = () => {
                       className="absolute inset-0"
                       aria-label={product.name}
                     >
-                      <img
-                        src={product.image}
+                      <Image
+                        src={product.mainImage.url}
                         alt={product.name}
+                        fill
                         className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                       />
                     </Link>
