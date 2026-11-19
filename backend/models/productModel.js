@@ -30,7 +30,7 @@ const productSchema = new mongoose.Schema(
       required: true,
     },
 
-    // Main Image: একটি ছবির URL ও public_id থাকবে
+    // Main Image
     mainImage: {
       url: {
         type: String,
@@ -42,7 +42,7 @@ const productSchema = new mongoose.Schema(
       },
     },
 
-    // Additional Images: সর্বোচ্চ ৩টি ছবি রাখা যাবে
+    // Additional Images
     additionalImages: {
       type: [
         {
@@ -57,7 +57,6 @@ const productSchema = new mongoose.Schema(
         },
       ],
 
-      // ৩টির বেশি ছবি হলে validation error দেবে
       validate: {
         validator: (images) => images.length <= 3,
         message: "Maximum 3 additional images allowed",

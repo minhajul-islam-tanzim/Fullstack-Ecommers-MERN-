@@ -155,6 +155,7 @@ console.log("NEW IMAGE:", req.files?.mainImage?.[0]);
 product.colors = colors
   ? JSON.parse(colors)
   : product.colors;
+  
     // Update image if a new image is uploaded
 
     if (req.files?.mainImage?.[0]) {
@@ -174,7 +175,7 @@ product.colors = colors
 
 
     await product.save();
-    
+
     console.log("SAVED PRODUCT:", product.mainImage);
 
     return res.status(200).json({
