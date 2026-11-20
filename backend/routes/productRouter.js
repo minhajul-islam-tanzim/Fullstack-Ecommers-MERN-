@@ -20,6 +20,7 @@ productRouter.post("/", isAuth, isAdmin,
 
       
 productRouter.get("/", getAllProducts)
+
 productRouter.get("/:id", getProductById)
 productRouter.delete("/:id",isAuth, isAdmin,deleteController)
 

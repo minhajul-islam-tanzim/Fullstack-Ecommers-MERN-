@@ -12,9 +12,9 @@ interface Product {
   _id: string;
   name: string;
   price: number;
-    mainImage: {
+  mainImage: {
     url: string;
-    public_id: string
+    public_id: string;
   };
 }
 
@@ -32,7 +32,10 @@ const NewArrivals = () => {
     const fetchProducts = async () => {
       try {
         const data = await getAllProducts();
+        console.log("API RESPONSE", data)
+
         setProducts(data.products.slice(0, 8));
+
       } catch (error) {
         console.error("Failed to load products", error);
       } finally {
@@ -67,7 +70,7 @@ const NewArrivals = () => {
 
   const toggleLike = (id: string) => {
     setLiked((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
     );
   };
 

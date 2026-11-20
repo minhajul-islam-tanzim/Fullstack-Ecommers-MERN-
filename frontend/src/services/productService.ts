@@ -29,9 +29,10 @@ export const getAllProducts = async () => {
 
     const data = await res.json();
 
-    if(!res.ok){
-        throw new Error(data.messgae || "Failed to fetch Data from products")
-    }
+    if (!res.ok) {
+  throw new Error(data.message || "Failed to fetch data from products");
+}
+
     return data;
 }
 
