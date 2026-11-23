@@ -1,62 +1,104 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { FiArrowUpRight } from "react-icons/fi";
+import { motion } from "framer-motion";
+
+const ease = [0.22, 1, 0.36, 1] as const;
 
 const categories = [
-  { name: "Men", image: "/images/men.jpg", link: "/categories/men" },
-  { name: "Women", image: "/images/women.jpg", link: "/categories/women" },
-  { name: "Kids", image: "/images/kids.jpg", link: "/categories/kids" },
+  { name: "Women", image: "/images/women.jpg", link: "/categories/women", count: "320+ products", tag: "Up to 40% off" },
+  { name: "Men", image: "/images/men.jpg", link: "/categories/men", count: "240+ products", tag: "New arrivals" },
+  { name: "Kids", image: "/images/kids.jpg", link: "/categories/kids", count: "180+ products", tag: "Flat 25% off" },
 ];
 
 const ShopByCategory = () => {
   return (
-    <section className="bg-white px-4 py-16 md:py-4">
+    <section className="bg-[#faf8f4] px-4 py-16 md:py-24">
       <div className="mx-auto max-w-7xl">
-  
-        {/* Panels */}
-        <div className=" flex flex-col gap-3 md:h-156 md:flex-row">
-          {categories.map((category, i) => (
-            <Link
-              href={category.link}
-              key={category.name}
-              className="group relative block h-72 overflow-hidden rounded-[2rem] bg-[#EEF3F5] md:h-full md:flex-1 md:transition-[flex-grow] md:duration-700 md:ease-out md:hover:grow-[3] md:focus-visible:grow-[3]"
+        {/* Heading */}
+        <div className="mx-auto mb-12 max-w-xl text-center md:mb-16">
+          <motion.p
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.9, ease }}
+            className="font-(family-name:--font-lato) text-xs font-semibold uppercase tracking-[0.35em] text-orange-600"
+          >
+            Shop by category
+          </motion.p>
+          <motion.h2
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 1, ease, delay: 0.1 }}
+            className="font-(family-name:--font-playfair) mt-3 text-4xl font-bold text-neutral-900 md:text-5xl"
+          >
+            Find something you'll love
+          </motion.h2>
+          <motion.p
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 1, delay: 0.25 }}
+            className="font-(family-name:--font-lato) mt-3 text-sm text-neutral-500 md:text-base"
+          >
+            Fresh styles for everyone, picked with care.
+          </motion.p>
+        </div>
+
+        {/* Cards */}
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-3 md:gap-8">
+          {categories.map((c, i) => (
+            <motion.div
+              key={c.name}
+              initial={{ opacity: 0, y: 60 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.2 }}
+              transition={{ duration: 1.1, ease, delay: i * 0.15 }}
             >
-              <Image
-                src={category.image}
-                alt={category.name}
-                fill
-                sizes="(min-width: 768px) 50vw, 100vw"
-                className="object-cover transition-transform duration-1000 ease-out group-hover:scale-105"
-              />
+              <Link href={c.link} className="group block">
+                {/* Image */}
+                <div className="relative aspect-[4/5] overflow-hidden rounded-3xl bg-neutral-200">
+                  <Image
+                    src={c.image}
+                    alt={c.name}
+                    fill
+                    sizes="(min-width: 768px) 33vw, 100vw"
+                    className="object-cover transition-transform duration-[1400ms] ease-out group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-linear-to-t from-black/25 via-transparent to-transparent" />
 
-              {/* shade */}
-              <div className="absolute inset-0 bg-linear-to-t from-black/55 via-black/5 to-black/10 transition-colors duration-500 md:group-hover:from-black/65" />
+                  {/* Tag */}
+                  <span className="font-(family-name:--font-lato) absolute left-4 top-4 rounded-full bg-white/90 px-3.5 py-1.5 text-xs font-semibold text-neutral-800 backdrop-blur-md">
+                    {c.tag}
+                  </span>
 
-              {/* Index */}
-              <span className="font-(family-name:--font-playfair) absolute left-6 top-5 text-sm tabular-nums text-white/80">
-                0{i + 1}
-              </span>
-
-              <span className="font-(family-name:--font-playfair) absolute bottom-6 left-1/2 hidden -translate-x-1/2 text-3xl font-semibold tracking-wide text-white transition-opacity duration-300 [writing-mode:vertical-rl] rotate-180 md:block md:group-hover:opacity-0">
-                {category.name}
-              </span>
-
-              {/* Open state: full content */}
-              <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 p-6 transition-all duration-500 md:translate-y-4 md:p-8 md:opacity-0 md:group-hover:translate-y-0 md:group-hover:opacity-100 md:group-hover:delay-200">
-                <div>
-                  <h3 className="font-(family-name:--font-playfair) text-4xl font-bold text-white md:text-6xl">
-                    {category.name}
-                  </h3>
-                  <p className="font-(family-name:--font-lato) mt-2 text-sm text-white/80">
-                    Shop now
-                  </p>
+                  {/* Hover arrow */}
+                  <span className="absolute bottom-4 right-4 flex h-12 w-12 translate-y-3 items-center justify-center rounded-full bg-white text-neutral-900 opacity-0 shadow-lg transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100">
+                    <FiArrowUpRight size={22} />
+                  </span>
                 </div>
 
-                <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-orange-500 text-white transition-transform duration-500 group-hover:rotate-45 md:h-14 md:w-14">
-                  <FiArrowUpRight size={24} />
-                </span>
-              </div>
-            </Link>
+                {/* Info */}
+                <div className="mt-5 flex items-end justify-between px-1">
+                  <div>
+                    <h3 className="font-(family-name:--font-playfair) text-2xl font-bold text-neutral-900 md:text-3xl">
+                      {c.name}
+                    </h3>
+                    <p className="font-(family-name:--font-lato) mt-1 text-sm text-neutral-500">
+                      {c.count}
+                    </p>
+                  </div>
+
+                  <span className="font-(family-name:--font-lato) relative pb-1 text-sm font-semibold text-neutral-900">
+                    Shop now
+                    <span className="absolute bottom-0 left-0 h-px w-full origin-left scale-x-30 bg-neutral-900 transition-transform duration-500 group-hover:scale-x-100" />
+                  </span>
+                </div>
+              </Link>
+            </motion.div>
           ))}
         </div>
       </div>
