@@ -5,6 +5,7 @@ import Link from "next/link";
 import { FiArrowLeft, FiArrowRight, FiArrowUpRight } from "react-icons/fi";
 import { FaHeart, FaRegHeart } from "react-icons/fa6";
 import { getAllProducts } from "@/services/productService";
+import { motion } from "framer-motion";
 
 import Image from "next/image";
 
@@ -32,10 +33,7 @@ const NewArrivals = () => {
     const fetchProducts = async () => {
       try {
         const data = await getAllProducts();
-        console.log("API RESPONSE", data)
-
         setProducts(data.products.slice(0, 8));
-
       } catch (error) {
         console.error("Failed to load products", error);
       } finally {
@@ -135,14 +133,19 @@ const NewArrivals = () => {
             onScroll={handleScroll}
             className="mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 md:mt-10 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           >
-            {products.map((product) => {
+            {products.map((product, index) => {
               const isLiked = liked.includes(product._id);
 
               return (
-                <div
-                  key={product._id}
-                  className="group w-[70%] shrink-0 snap-start sm:w-[40%] md:w-[28%] lg:w-[23.5%]"
-                >
+              <motion.div
+  key={product._id}
+  initial={{ opacity: 0, y: 40 }}
+  whileInView={{ opacity: 1, y: 0 }}
+  viewport={{ once: true, amount: 0.2 }}
+  transition={{ duration: 0.5, delay: index * 0.1, ease: "easeOut" }}
+  className="group w-[70%] shrink-0 snap-start sm:w-[40%] md:w-[28%] lg:w-[23.5%]"
+>
+
                   <div className="relative aspect-4/5 overflow-hidden rounded-2xl bg-[#EEF3F5]">
                     <Link
                       href={`/products/${product._id}`}
@@ -195,7 +198,7 @@ const NewArrivals = () => {
                       ৳ {product.price}
                     </p>
                   </div>
-                </div>
+                </motion.div>
               );
             })}
           </div>
