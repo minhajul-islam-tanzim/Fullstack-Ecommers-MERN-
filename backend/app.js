@@ -9,6 +9,7 @@ const app = express();
 const authRoutes = require('./routes/authRouter')
 const userEditRouter = require("./routes/userEditRouter");
 const productRouter = require("./routes/productRouter")
+const cartRouter = require("./routes/cartRoutes")
 
 
 const store = new MongoDBStore({
@@ -49,6 +50,7 @@ app.use(
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userEditRouter)
 app.use("/api/products", productRouter)
+app.use("/api/cart", cartRouter)
 
 
 
