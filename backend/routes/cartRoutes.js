@@ -6,6 +6,6 @@ const {addToCart} = require("../controllers/cartController")
 const auth = require("../middlewares/isAuth")
 
 
-router.post("/add", auth, addToCart);
+router.post("/", auth, addToCart);
 
 module.exports = router;
