@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import { deleteProduct, getProductById } from "@/services/productService";
 import { getMe } from "@/services/authService";
+import { addToCart } from "@/services/cartService"
 
 interface ProductImage {
   url: string;
@@ -39,7 +40,31 @@ function ProductDetailsPage() {
   const [activeImage, setActiveImage] = useState(0);
   const [selectedSize, setSelectedSize] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
+  const [quantity, setQuantity] = useState(1);
 
+  const handleAddToCart = async () => {
+    try{
+      if(!selectedSize || !selectedColor){
+        alert("Please Select size and color")
+        return ;
+      }
+
+      const data = await addToCart(
+        product!._id,
+        quantity, 
+        selectedSize,
+        selectedColor
+        
+      )
+
+      alert(data.message)
+
+    }catch(error){
+      console.log(error);
+    alert("Failed to add product to cart");
+    }
+
+  }
 
   const handleDelete = async () => { 
     try{ 
@@ -234,18 +259,54 @@ function ProductDetailsPage() {
                 : "Out of stock"}
             </p>
 
-            {/* Add to Cart */}
-            <button
-              disabled={
-                product.stock <= 0 ||
-                (product.sizes?.length > 0 && !selectedSize) ||
-                (product.colors?.length > 0 && !selectedColor)
-              }
-              className="rounded-xl bg-[#292521] px-6 py-4 text-white disabled:opacity-40"
-            >
-              Add to Cart
-            </button>
 
+
+
+        <div className="flex items-center justify-between bg-gray-100 rounded-xl px-4 py-3 w-fit gap-6">
+  <p className="text-sm font-medium text-gray-700">Quantity</p>
+
+  <div className="flex items-center gap-3 bg-white rounded-lg border border-gray-300 px-2 py-1">
+    <button
+      onClick={() => setQuantity((prev) => Math.max(1, prev - 1))}
+
+
+      className="w-8 h-8 flex items-center justify-center rounded-md text-lg font-bold text-gray-700 hover:bg-gray-200 active:scale-95 transition disabled:opacity-40"
+      disabled={quantity <= 1}
+    >
+      −
+    </button>
+
+    <span className="w-8 text-center font-semibold text-gray-900">
+      {quantity}
+    </span>
+
+    <button
+      onClick={() => setQuantity((prev) => prev + 1)}
+      className="w-8 h-8 flex items-center justify-center rounded-md text-lg font-bold text-gray-700 hover:bg-gray-200 active:scale-95 transition"
+    >
+      +
+    </button>
+  </div>
+</div>
+
+
+
+            {/* Add to Cart */}
+            {product && (
+  <div>
+    <button
+      onClick={handleAddToCart}
+      disabled={
+        product.stock <= 0 ||
+        (product.sizes?.length > 0 && !selectedSize) ||
+        (product.colors?.length > 0 && !selectedColor)
+      }
+      className="rounded-xl bg-[#292521] px-6 py-4 text-white transition disabled:cursor-not-allowed disabled:opacity-40"
+    >
+      {product.stock <= 0 ? "Out of Stock" : "Add to Cart"}
+    </button>
+  </div>
+)}
             {/* Admin Edit Button */}
             {isAdmin && (
               <div>
